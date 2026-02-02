@@ -4,29 +4,19 @@ import { MortgageCalculator } from '../components/MortgageCalculator';
 
 const listingLinks = [
   {
-    title: 'Homes.com',
-    description: 'Search millions of homes for sale and rent',
-    url: 'https://www.homes.com',
-  },
-  {
     title: 'My Hilltop Realty',
-    description: 'Local listings and property search',
+    description: "Henry Estrada's listings and agent profile",
     url: 'https://www.myhilltoprealty.com',
   },
   {
-    title: 'Realtor.com',
-    description: 'Find your perfect home',
-    url: 'https://www.realtor.com',
+    title: 'Homes.com',
+    description: "Henry Estrada's agent page and current listings",
+    url: 'https://www.homes.com/real-estate-agents/enrique-henry-estrada/39rj47e/',
   },
   {
     title: 'Zillow',
-    description: 'Real estate and rental marketplace',
-    url: 'https://www.zillow.com',
-  },
-  {
-    title: 'Redfin',
-    description: 'Search homes for sale and local agents',
-    url: 'https://www.redfin.com',
+    description: "Henry Estrada's Zillow profile and listings",
+    url: 'https://www.zillow.com/profile/estradasold2',
   },
 ];
 
@@ -45,9 +35,9 @@ export function Resources() {
           {/* Listing Links */}
           <Card>
             <CardHeader>
-              <h2 className="text-xl font-semibold text-white">Listing Links</h2>
+              <h2 className="text-xl font-semibold text-white">Listings</h2>
               <p className="text-sm text-neutral-400 mt-1">
-                Browse properties on these popular real estate platforms
+                View current Estrada listings and agent profiles
               </p>
             </CardHeader>
             <CardContent className="p-0">
