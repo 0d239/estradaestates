@@ -9,7 +9,7 @@ export function Header() {
       <div className="container-wide">
         <div className="flex items-center justify-between h-16">
           <NavLink to="/" className="flex items-center gap-2">
-            <span className="text-lg font-bold text-white">{companyInfo.name}</span>
+            <img src="/logo.png" alt={companyInfo.name} className="h-10" />
           </NavLink>
 
           <nav className="flex items-center gap-1">
