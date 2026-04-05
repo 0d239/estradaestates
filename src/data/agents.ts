@@ -70,7 +70,7 @@ export const team: TeamMember[] = [
 export const metrics = [
   { label: 'Years of Service', value: '30+' },
   { label: 'Clients Helped', value: '8,000+' },
-  { label: 'Sales Volume', value: '$100M+' },
+  { label: 'Sales Volume', value: '$450M+' },
 ];
 
 export const companyInfo = {
