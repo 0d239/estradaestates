@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200" fill="none">
+  <!-- Main hill ridge -->
+  <path
+    d="M0 140 C60 138, 100 130, 160 110 C200 96, 240 78, 300 72 C340 68, 360 80, 390 90 C420 100, 440 95, 470 82 C510 66, 540 55, 580 58 C620 62, 650 78, 690 95 C720 106, 760 118, 800 125"
+    stroke="#FBBF24" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"
+  />
+  <!-- Secondary ridge line (slightly below, offset) -->
+  <path
+    d="M30 148 C80 144, 130 132, 180 118 C220 106, 260 90, 310 82 C350 76, 380 88, 410 96 C440 104, 465 98, 500 86 C540 72, 570 64, 610 68 C650 74, 680 86, 720 100 C750 110, 780 120, 800 130"
+    stroke="#D4A017" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"
+  />
+  <!-- Lower accent line left -->
+  <path
+    d="M80 158 C120 154, 170 146, 220 138 C270 130, 310 126, 360 128 C390 130, 410 134, 430 138"
+    stroke="#B8860B" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"
+  />
+  <!-- Lower accent line right -->
+  <path
+    d="M460 132 C500 126, 540 120, 580 118 C620 116, 660 120, 710 130 C740 136, 770 142, 800 146"
+    stroke="#B8860B" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"
+  />
+  <!-- Ground wisp left -->
+  <path
+    d="M140 166 C180 162, 230 156, 290 154 C320 153, 340 155, 350 158"
+    stroke="#9A7B0A" stroke-width="5" stroke-linecap="round"
+  />
+  <!-- Ground wisp right -->
+  <path
+    d="M500 152 C540 148, 590 144, 640 143 C670 143, 700 146, 720 150"
+    stroke="#9A7B0A" stroke-width="5" stroke-linecap="round"
+  />
+</svg>

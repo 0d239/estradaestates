@@ -8,14 +8,17 @@ export function Header() {
     <header className="bg-neutral-800 border-b border-neutral-700 sticky top-0 z-50">
       <div className="container-wide">
         <div className="flex items-center justify-between h-16">
-          <NavLink to="/" className="flex items-center gap-2">
-            <img src="/logo.png" alt={companyInfo.name} className="h-10" />
+          <NavLink to="/" className="flex items-center gap-2.5">
+            <img src="/hills.svg" alt="Estrada Estates" className="h-9 w-auto logo-glow" />
+            <span className="text-2xl font-bold text-white font-serif hidden">
+              Estrada Estates
+            </span>
           </NavLink>
 
           <nav className="flex items-center gap-1">
-            <NavItem to="/">Realtors</NavItem>
+            <NavItem to="/">Team</NavItem>
+            <NavItem to="/services">Services</NavItem>
             <NavItem to="/resources">Resources</NavItem>
-            <NavItem to="/client-portal">Client Portal</NavItem>
           </nav>
 
           <a
