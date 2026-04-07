@@ -1,0 +1,1 @@
+- [Project Direction](project_direction.md) — Evolving from static SPA to full-stack app with Supabase + Vercel
