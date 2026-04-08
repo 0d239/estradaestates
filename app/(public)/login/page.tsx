@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { LogIn } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
@@ -15,14 +15,26 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (session) {
-      router.replace('/dashboard');
-    }
-  }, [session, router]);
-
   if (session) {
-    return null;
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center py-12">
+        <div className="w-full max-w-md">
+          <Card>
+            <CardContent className="py-8 text-center space-y-4">
+              <p className="text-neutral-300">You&apos;re already signed in.</p>
+              <div className="flex gap-3 justify-center">
+                <Button variant="primary" onClick={() => router.push('/dashboard')}>
+                  Go to Dashboard
+                </Button>
+                <Button variant="outline" onClick={() => router.push('/')}>
+                  View Site
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
   }
 
   async function handleSubmit(e: React.FormEvent) {

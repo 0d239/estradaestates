@@ -8,10 +8,12 @@ Estrada Estates Realty Group — a Next.js App Router + Supabase backend for a r
 
 ## Commands
 
-- `npm run dev` — start Next.js dev server with Turbopack
-- `npm run build` — Next.js production build
-- `npm run start` — serve the production build locally
-- `npm run lint` — ESLint across the project
+- `bun dev` — start Next.js dev server with Turbopack
+- `bun run build` — Next.js production build
+- `bun start` — serve the production build locally
+- `bun lint` — ESLint across the project
+
+**Package manager: bun** — use `bun` instead of `npm` for all install/run commands.
 
 ## Architecture
 
@@ -27,22 +29,24 @@ Estrada Estates Realty Group — a Next.js App Router + Supabase backend for a r
 **Public routes** (route group `app/(public)/` with Header + Footer layout):
 - `/` — Team page
 - `/services` — Services page
-- `/resources` — Resources page
+- `/contact` — Public lead/contact form
 - `/listings` — Public listings browse
 - `/listings/[id]` — Listing detail
 - `/login` — Team login
 
-**Protected dashboard routes** (`app/dashboard/` with sidebar layout, protected by middleware):
-- `/dashboard` — Dashboard home
+**Protected dashboard routes** (`app/(public)/dashboard/` with tab bar layout, protected by middleware):
+- `/dashboard` — Dashboard overview
 - `/dashboard/contacts` — Contact management (clients, leads, partners)
 - `/dashboard/listings` — Listing management (CRUD)
 - `/dashboard/communications` — Mass text/email compose and history
+
+Dashboard lives inside the `(public)` route group so it shares the same Header, Footer, and hills background as the rest of the site. Auth protection is handled by middleware (unchanged — checks `/dashboard` path prefix). The dashboard layout renders a horizontal tab bar for sub-navigation instead of a sidebar.
 
 ### Key directories
 
 - `app/` — Next.js App Router pages and layouts
 - `app/(public)/` — public route group with shared layout (Header/Footer)
-- `app/dashboard/` — authenticated dashboard with sidebar layout
+- `app/(public)/dashboard/` — authenticated dashboard with tab bar layout (shares public layout)
 - `src/components/ui/` — reusable UI primitives (Button, Card, Badge, Accordion)
 - `src/components/layout/` — Header, Footer
 - `src/components/dashboard/` — dashboard feature components (ContactForm, ListingForm, ComposeMessage)

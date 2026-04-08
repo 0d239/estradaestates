@@ -2,21 +2,22 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Search, Trash2, Pencil } from 'lucide-react'
+import { Plus, Search, Trash2, Pencil, Rss, PenLine } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/Button'
 import { ListingForm } from '@/components/dashboard/ListingForm'
-import type { Listing, ListingStatus } from '@/lib/database.types'
+import type { Listing, ListingStatus, ListingSource } from '@/lib/database.types'
 
 export default function DashboardListingsPage() {
   const queryClient = useQueryClient()
   const [statusFilter, setStatusFilter] = useState<ListingStatus | ''>('')
+  const [sourceFilter, setSourceFilter] = useState<ListingSource | ''>('')
   const [search, setSearch] = useState('')
   const [showForm, setShowForm] = useState(false)
   const [editingListing, setEditingListing] = useState<Listing | null>(null)
 
   const { data: listings, isLoading } = useQuery({
-    queryKey: ['listings', 'dashboard', statusFilter],
+    queryKey: ['listings', 'dashboard', statusFilter, sourceFilter],
     queryFn: async () => {
       let query = supabase
         .from('listings')
@@ -25,6 +26,9 @@ export default function DashboardListingsPage() {
 
       if (statusFilter) {
         query = query.eq('status', statusFilter)
+      }
+      if (sourceFilter) {
+        query = query.eq('source', sourceFilter)
       }
 
       const { data, error } = await query
@@ -103,6 +107,15 @@ export default function DashboardListingsPage() {
           <option value="sold">Sold</option>
           <option value="off_market">Off Market</option>
         </select>
+        <select
+          value={sourceFilter}
+          onChange={(e) => setSourceFilter(e.target.value as ListingSource | '')}
+          className="px-4 py-2.5 bg-neutral-800 border border-neutral-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+        >
+          <option value="">All Sources</option>
+          <option value="manual">Manual</option>
+          <option value="idx">IDX</option>
+        </select>
       </div>
 
       {/* Listing form modal */}
@@ -127,6 +140,7 @@ export default function DashboardListingsPage() {
                 <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500 uppercase hidden md:table-cell">Price</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500 uppercase hidden md:table-cell">Beds/Baths</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500 uppercase hidden lg:table-cell">MLS #</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500 uppercase hidden md:table-cell">Source</th>
                 <th className="text-right px-4 py-3 text-xs font-medium text-neutral-500 uppercase">Actions</th>
               </tr>
             </thead>
@@ -157,25 +171,38 @@ export default function DashboardListingsPage() {
                   <td className="px-4 py-3 text-sm text-neutral-400 hidden lg:table-cell">
                     {listing.mls_number || '—'}
                   </td>
+                  <td className="px-4 py-3 hidden md:table-cell">
+                    <span className="inline-flex items-center gap-1 text-xs text-neutral-400">
+                      {listing.source === 'idx' ? (
+                        <><Rss className="w-3 h-3" /> IDX</>
+                      ) : (
+                        <><PenLine className="w-3 h-3" /> Manual</>
+                      )}
+                    </span>
+                  </td>
                   <td className="px-4 py-3 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => handleEdit(listing)}
-                        className="p-1.5 text-neutral-500 hover:text-white transition-colors"
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => {
-                          if (confirm('Delete this listing?')) {
-                            deleteMutation.mutate(listing.id)
-                          }
-                        }}
-                        className="p-1.5 text-neutral-500 hover:text-red-400 transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
+                    {listing.source === 'manual' ? (
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => handleEdit(listing)}
+                          className="p-1.5 text-neutral-500 hover:text-white transition-colors"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (confirm('Delete this listing?')) {
+                              deleteMutation.mutate(listing.id)
+                            }
+                          }}
+                          className="p-1.5 text-neutral-500 hover:text-red-400 transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-neutral-600">Synced</span>
+                    )}
                   </td>
                 </tr>
               ))}

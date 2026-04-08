@@ -1,6 +1,8 @@
 export type ContactType = 'client' | 'lead' | 'partner';
 export type ContactStatus = 'active' | 'inactive';
+export type LeadInterest = 'buying' | 'selling' | 'both';
 export type ListingStatus = 'active' | 'pending' | 'sold' | 'off_market';
+export type ListingSource = 'idx' | 'manual';
 export type InterestLevel = 'interested' | 'shown' | 'offered' | 'closed';
 export type CommunicationChannel = 'sms' | 'email';
 export type CommunicationRecipientStatus = 'sent' | 'delivered' | 'failed';
@@ -72,6 +74,8 @@ export interface Database {
           notes: string | null;
           assigned_to: string | null;
           company: string | null;
+          interest: LeadInterest | null;
+          property_zipcode: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -91,6 +95,8 @@ export interface Database {
           notes?: string | null;
           assigned_to?: string | null;
           company?: string | null;
+          interest?: LeadInterest | null;
+          property_zipcode?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -110,6 +116,8 @@ export interface Database {
           notes?: string | null;
           assigned_to?: string | null;
           company?: string | null;
+          interest?: LeadInterest | null;
+          property_zipcode?: string | null;
           updated_at?: string;
         };
         Relationships: [];
@@ -132,6 +140,10 @@ export interface Database {
           photos: string[];
           mls_number: string | null;
           listed_by: string | null;
+          source: ListingSource;
+          idx_key: string | null;
+          idx_synced_at: string | null;
+          idx_removed_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -152,6 +164,10 @@ export interface Database {
           photos?: string[];
           mls_number?: string | null;
           listed_by?: string | null;
+          source?: ListingSource;
+          idx_key?: string | null;
+          idx_synced_at?: string | null;
+          idx_removed_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -172,6 +188,10 @@ export interface Database {
           photos?: string[];
           mls_number?: string | null;
           listed_by?: string | null;
+          source?: ListingSource;
+          idx_key?: string | null;
+          idx_synced_at?: string | null;
+          idx_removed_at?: string | null;
           updated_at?: string;
         };
         Relationships: [];
@@ -238,7 +258,7 @@ export interface Database {
         };
         Relationships: [];
       };
-    };
+};
   };
 }
 

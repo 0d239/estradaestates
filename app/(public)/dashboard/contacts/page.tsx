@@ -2,21 +2,20 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Search, Users, Building, Handshake, Trash2, Pencil } from 'lucide-react'
+import { Plus, Search, Users, Handshake, Trash2, Pencil } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/Button'
 import { ContactForm } from '@/components/dashboard/ContactForm'
 import type { Contact, ContactType } from '@/lib/database.types'
 
-const typeConfig: Record<ContactType, { label: string; icon: typeof Users }> = {
+const typeConfig: Record<Exclude<ContactType, 'lead'>, { label: string; icon: typeof Users }> = {
   client: { label: 'Clients', icon: Users },
-  lead: { label: 'Leads', icon: Building },
   partner: { label: 'Partners', icon: Handshake },
 }
 
 export default function ContactsPage() {
   const queryClient = useQueryClient()
-  const [typeFilter, setTypeFilter] = useState<ContactType | ''>('')
+  const [typeFilter, setTypeFilter] = useState<Exclude<ContactType, 'lead'> | ''>('')
   const [search, setSearch] = useState('')
   const [showForm, setShowForm] = useState(false)
   const [editingContact, setEditingContact] = useState<Contact | null>(null)
@@ -27,6 +26,7 @@ export default function ContactsPage() {
       let query = supabase
         .from('contacts')
         .select('*')
+        .neq('type', 'lead')
         .order('created_at', { ascending: false })
 
       if (typeFilter) {
@@ -96,7 +96,7 @@ export default function ContactsPage() {
           <FilterButton active={typeFilter === ''} onClick={() => setTypeFilter('')}>
             All
           </FilterButton>
-          {(Object.entries(typeConfig) as [ContactType, typeof typeConfig[ContactType]][]).map(
+          {(Object.entries(typeConfig) as [Exclude<ContactType, 'lead'>, (typeof typeConfig)[Exclude<ContactType, 'lead'>]][]).map(
             ([type, { label, icon: Icon }]) => (
               <FilterButton
                 key={type}

@@ -40,7 +40,7 @@ export const team: TeamMember[] = [
     phone: '(831) 524-7076',
     email: 'soldbysophiaestrada@gmail.com',
     image: 'https://placehold.co/400x400/1a1a1a/666666?text=Sophia+Estrada&font=Inter',
-    bio: 'Sophia Estrada brings fresh energy and modern marketing expertise to Estrada Estates Realty Group. With a passion for helping clients navigate the home buying and selling process, Sophia combines innovative technology with personalized service to deliver exceptional results.',
+    bio: 'Sophia Estrada represents the next generation of Hilltop Realty and Estrada Estates, bringing a fresh, client-first approach backed by experience working with top-performing real estate teams. She is known for her strong communication, attention to detail, and ability to create a personalized experience tailored to each client\'s unique needs.\n\nSophia is passionate about helping clients navigate one of life\'s biggest milestones with confidence and ease. Whether working with first-time buyers or those going through a transition, she is committed to making the process feel supported, seamless, and rewarding every step of the way.',
     specialties: [
       'Digital Marketing',
       'First-Time Homebuyers',
@@ -54,8 +54,8 @@ export const team: TeamMember[] = [
     name: 'Laura Velasco',
     title: 'Design + Property Value Strategist',
     phone: '',
-    email: '',
-    image: 'https://placehold.co/400x400/1a1a1a/666666?text=Laura+Velasco&font=Inter',
+    email: 'laura@levelupid.com',
+    image: '/laura_velasco.jpg',
     bio: 'With over 15 years of industry experience, Laura founded Level Up Interiors in 2018. Laura graduated from The Art Institute of CA–San Diego with a BS in Interior Design and served in the Army National Guard for 7 years as an Operations Specialist in the 670th MP Company. She started her career in model home merchandising at an award-winning design firm where she quickly mastered impactful and smart design to sell out communities. Laura has partnered with developers, property management groups, and asset managers, priding herself in customer service and long-lasting relationships.',
     specialties: [
       'Commercial Interior Design',

@@ -1,1 +1,2 @@
-- [Project Direction](project_direction.md) — Evolving from static SPA to full-stack app with Supabase + Vercel
+- [Project Direction](project_direction.md) — Full-stack migration complete (Vite→Next.js 16, GH Pages→Vercel, Supabase wired up), now building CRM features
+- [Use bun](feedback_use_bun.md) — Always use bun instead of npm for all commands

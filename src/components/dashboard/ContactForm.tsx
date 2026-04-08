@@ -32,6 +32,8 @@ export function ContactForm({ contact, onClose }: ContactFormProps) {
     notes: contact?.notes ?? null,
     assigned_to: contact?.assigned_to ?? null,
     company: contact?.company ?? null,
+    interest: contact?.interest ?? null,
+    property_zipcode: contact?.property_zipcode ?? null,
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});

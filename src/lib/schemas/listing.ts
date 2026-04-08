@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+export const listingSourceSchema = z.enum(['idx', 'manual']);
+
 export const listingSchema = z.object({
   address: z.string().min(1, 'Address is required'),
   city: z.string().nullable().optional(),

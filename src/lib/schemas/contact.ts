@@ -16,6 +16,8 @@ export const contactSchema = z
     notes: z.string().nullable().optional(),
     assigned_to: z.string().uuid().nullable().optional(),
     company: z.string().nullable().optional(),
+    interest: z.enum(['buying', 'selling', 'both']).nullable().optional(),
+    property_zipcode: z.string().nullable().optional(),
   })
   .refine((data) => data.phone || data.email, {
     message: 'At least one of phone or email is required',
