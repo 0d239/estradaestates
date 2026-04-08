@@ -116,7 +116,7 @@ function Section({
   title,
   content,
 }: {
-  icon: typeof BookOpen
+  icon: typeof UserPlus
   title: string
   content: React.ReactNode
 }) {
