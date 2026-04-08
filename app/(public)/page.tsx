@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Phone, Mail, Award, MapPin } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -62,18 +62,52 @@ function AnimatedMetric({ value, label }: { value: string; label: string }) {
 }
 
 export default function TeamPage() {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Enable scroll-snap + observe all reveal elements
+  useEffect(() => {
+    document.documentElement.classList.add('snap-scroll');
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12, rootMargin: '0px 0px -50px 0px' },
+    );
+
+    const container = containerRef.current;
+    if (container) {
+      container.querySelectorAll('.reveal, .reveal-fade, .reveal-scale').forEach((el) => {
+        observer.observe(el);
+      });
+    }
+
+    return () => {
+      document.documentElement.classList.remove('snap-scroll');
+      observer.disconnect();
+    };
+  }, []);
+
   return (
-    <div className="py-12">
+    <div ref={containerRef} className="py-12">
       {/* Metric Story Hero */}
-      <section className="container-narrow text-center mb-16">
+      <section className="container-narrow text-center mb-24 snap-section reveal-fade">
         <Badge className="mb-4">Hollister, CA Real Estate</Badge>
         <h1 className="text-4xl font-bold text-white mb-4">
           Welcome to {companyInfo.name}
         </h1>
-        <p className="text-lg text-neutral-400 max-w-2xl mx-auto mb-10">
+        <p className="text-lg text-neutral-400 max-w-2xl mx-auto mb-2">
           Expert knowledge and decades of experience helping you achieve your real estate goals.
         </p>
-        <div className="grid grid-cols-3 gap-6 max-w-xl mx-auto">
+        <p className="text-xs text-neutral-500 mb-10">
+          A d/b/a of {companyInfo.legalName}
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-xl mx-auto">
           {metrics.map((metric) => (
             <AnimatedMetric key={metric.label} value={metric.value} label={metric.label} />
           ))}
@@ -83,9 +117,9 @@ export default function TeamPage() {
       {/* Team by Division */}
       <DivisionTabs>
         {(active) => (
-          <section className="container-narrow mb-16 space-y-8">
-            {team.filter((m) => m.division === active).map((member) => (
-              <Card key={member.id} className="overflow-hidden">
+          <section className="container-narrow mb-16 space-y-8 snap-section">
+            {team.filter((m) => m.division === active).map((member, i) => (
+              <Card key={member.id} className={`overflow-hidden reveal stagger-${i + 1}`}>
                 <div className="grid md:grid-cols-3 gap-0">
                   <div className="aspect-square md:aspect-auto">
                     <img
@@ -149,31 +183,32 @@ export default function TeamPage() {
       </DivisionTabs>
 
       {/* Office Info */}
-      <section className="container-narrow">
+      <section className="container-narrow snap-section reveal-scale">
         <Card>
-          <CardContent className="p-8">
+          <CardContent className="p-6 sm:p-8 overflow-hidden">
             <div className="grid md:grid-cols-2 gap-8">
-              <div>
+              <div className="min-w-0">
                 <h2 className="text-xl font-bold text-white mb-4">Our Office</h2>
                 <div className="space-y-4 text-neutral-400">
                   <div className="flex items-start gap-3">
-                    <MapPin className="w-5 h-5 text-primary-400 mt-0.5" />
-                    <div>
+                    <MapPin className="w-5 h-5 text-primary-400 mt-0.5 shrink-0" />
+                    <div className="min-w-0">
                       <p className="font-medium text-white">{companyInfo.name}</p>
+                      <p className="text-xs text-neutral-500 italic">d/b/a of {companyInfo.legalName}</p>
                       <p>{companyInfo.address}</p>
                       <p>{companyInfo.city}, {companyInfo.state} {companyInfo.zip}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Phone className="w-5 h-5 text-primary-400" />
-                    <div>
+                    <Phone className="w-5 h-5 text-primary-400 shrink-0" />
+                    <div className="min-w-0">
                       <p>Office: {companyInfo.phone}</p>
                       <p>Fax: {companyInfo.fax}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Mail className="w-5 h-5 text-primary-400" />
-                    <a href={`mailto:${companyInfo.email}`} className="hover:text-primary-400 transition-colors">
+                    <Mail className="w-5 h-5 text-primary-400 shrink-0" />
+                    <a href={`mailto:${companyInfo.email}`} className="hover:text-primary-400 transition-colors break-all">
                       {companyInfo.email}
                     </a>
                   </div>

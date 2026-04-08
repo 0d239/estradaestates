@@ -16,9 +16,10 @@ import {
   X,
   SlidersHorizontal,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/Badge';
 import { supabase } from '@/lib/supabase';
 import type { Listing, ListingStatus } from '@/lib/database.types';
 
@@ -198,45 +199,56 @@ export default function ListingsPage() {
   }
 
   const [showFilters, setShowFilters] = useState(false);
+  const listingsTopRef = useRef<HTMLDivElement>(null);
+
+  const openFilters = useCallback(() => {
+    listingsTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setShowFilters(true);
+  }, []);
+
+  // Lock body scroll when mobile filter panel is open
+  useEffect(() => {
+    if (showFilters) {
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = ''; };
+    }
+  }, [showFilters]);
 
   return (
     <div className="py-12">
+      <div ref={listingsTopRef} className="scroll-mt-16" />
       <section className="container-wide">
         {/* Header */}
         <div className="text-center mb-10">
-          <h1 className="text-4xl font-bold text-white mb-4">Property Listings</h1>
-          <p className="text-lg text-neutral-400 max-w-2xl mx-auto">
-            Browse our current listings in San Benito County and beyond.
-          </p>
+          <Badge className="mb-4">San Benito County &amp; Beyond</Badge>
+          <h1 className="text-4xl font-bold text-white">Property Listings</h1>
         </div>
 
         <div className="flex gap-8">
           {/* Sidebar filters — always visible on lg+, toggleable on mobile */}
-          <aside
+          {/* Mobile centered modal filters */}
+          <div
             className={cn(
-              'fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:static lg:bg-transparent lg:backdrop-blur-none lg:z-auto transition-opacity',
-              showFilters ? 'opacity-100' : 'opacity-0 pointer-events-none lg:opacity-100 lg:pointer-events-auto'
+              'fixed inset-0 z-[60] bg-black/40 backdrop-blur-xl transition-opacity lg:hidden flex flex-col',
+              showFilters ? 'opacity-100' : 'opacity-0 pointer-events-none'
             )}
             onClick={() => setShowFilters(false)}
           >
             <div
-              className={cn(
-                'fixed left-0 top-0 h-full w-72 bg-neutral-900 border-r border-neutral-800 p-5 overflow-y-auto transition-transform lg:static lg:translate-x-0 lg:border lg:border-neutral-800 lg:rounded-2xl lg:h-fit lg:shrink-0',
-                showFilters ? 'translate-x-0' : '-translate-x-full'
-              )}
+              className="flex-1 flex flex-col px-6 pt-14 pb-8 overflow-y-auto overscroll-contain"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between mb-5">
-                <h2 className="text-sm font-semibold text-white flex items-center gap-2">
-                  <SlidersHorizontal className="w-4 h-4" />
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                  <SlidersHorizontal className="w-5 h-5" />
                   Filters
                 </h2>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   {activeFilterCount > 0 && (
                     <button
                       type="button"
                       onClick={clearAll}
-                      className="text-xs text-neutral-500 hover:text-primary-400 transition-colors"
+                      className="text-xs text-neutral-400 hover:text-primary-400 transition-colors"
                     >
                       Clear all
                     </button>
@@ -244,119 +256,76 @@ export default function ListingsPage() {
                   <button
                     type="button"
                     onClick={() => setShowFilters(false)}
-                    className="lg:hidden text-neutral-400 hover:text-white"
+                    className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-neutral-300 hover:text-white transition-colors"
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
               </div>
 
-              <div className="space-y-5">
-                {/* Status */}
-                <FilterGroup label="Status" icon={CircleDot}>
-                  {STATUS_CONFIG.map(({ value, label, icon: StatusIcon }) => (
-                    <Chip
-                      key={value}
-                      active={statusFilter === value}
-                      onClick={() => setStatusFilter(value)}
-                    >
-                      <StatusIcon className="w-3.5 h-3.5" />
-                      {label}
-                    </Chip>
-                  ))}
-                </FilterGroup>
+              <div className="space-y-6 flex-1">
+                <FilterContent
+                  statusFilter={statusFilter} setStatusFilter={setStatusFilter}
+                  cityFilter={cityFilter} setCityFilter={setCityFilter}
+                  cities={cities}
+                  bedroomFilter={bedroomFilter} setBedroomFilter={setBedroomFilter}
+                  priceRange={priceRange} setPriceRange={setPriceRange}
+                  sort={sort} setSort={setSort}
+                />
+              </div>
+            </div>
+          </div>
 
-                {/* City */}
-                {cities.length > 0 && (
-                  <FilterGroup label="City" icon={MapPin}>
-                    <Chip
-                      active={cityFilter === ''}
-                      onClick={() => setCityFilter('')}
-                    >
-                      All
-                    </Chip>
-                    {cities.map((city) => (
-                      <Chip
-                        key={city}
-                        active={cityFilter === city}
-                        onClick={() => setCityFilter(city)}
-                      >
-                        {city}
-                      </Chip>
-                    ))}
-                  </FilterGroup>
+          {/* Desktop sidebar filters */}
+          <aside className="hidden lg:block w-72 shrink-0">
+            <div className="border border-neutral-800 rounded-2xl p-5 sticky top-20">
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-sm font-semibold text-white flex items-center gap-2">
+                  <SlidersHorizontal className="w-4 h-4" />
+                  Filters
+                </h2>
+                {activeFilterCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={clearAll}
+                    className="text-xs text-neutral-500 hover:text-primary-400 transition-colors"
+                  >
+                    Clear all
+                  </button>
                 )}
-
-                {/* Bedrooms */}
-                <FilterGroup label="Beds" icon={Bed}>
-                  <Chip
-                    active={bedroomFilter === null}
-                    onClick={() => setBedroomFilter(null)}
-                  >
-                    Any
-                  </Chip>
-                  {BEDROOM_OPTIONS.map((n) => (
-                    <Chip
-                      key={n}
-                      active={bedroomFilter === n}
-                      onClick={() => setBedroomFilter(bedroomFilter === n ? null : n)}
-                    >
-                      {n === 5 ? '5+' : String(n)}
-                    </Chip>
-                  ))}
-                </FilterGroup>
-
-                {/* Price */}
-                <FilterGroup label="Price" icon={DollarSign}>
-                  <Chip
-                    active={priceRange === null}
-                    onClick={() => setPriceRange(null)}
-                  >
-                    Any
-                  </Chip>
-                  {PRICE_RANGES.map((range, i) => (
-                    <Chip
-                      key={range.label}
-                      active={priceRange === i}
-                      onClick={() => setPriceRange(priceRange === i ? null : i)}
-                    >
-                      {range.label}
-                    </Chip>
-                  ))}
-                </FilterGroup>
-
-                {/* Sort */}
-                <FilterGroup label="Sort" icon={ArrowUpDown}>
-                  {SORT_OPTIONS.map(({ key, label }) => (
-                    <Chip key={key} active={sort === key} onClick={() => setSort(key)}>
-                      {label}
-                    </Chip>
-                  ))}
-                </FilterGroup>
+              </div>
+              <div className="space-y-5">
+                <FilterContent
+                  statusFilter={statusFilter} setStatusFilter={setStatusFilter}
+                  cityFilter={cityFilter} setCityFilter={setCityFilter}
+                  cities={cities}
+                  bedroomFilter={bedroomFilter} setBedroomFilter={setBedroomFilter}
+                  priceRange={priceRange} setPriceRange={setPriceRange}
+                  sort={sort} setSort={setSort}
+                />
               </div>
             </div>
           </aside>
 
           {/* Main content */}
           <div className="flex-1 min-w-0">
-            {/* Mobile filter toggle + results count */}
-            <div className="flex items-center justify-between mb-6">
+            {/* Mobile filter button + results count */}
+            <div className="flex items-center justify-center lg:justify-between mb-6">
               <button
                 type="button"
-                onClick={() => setShowFilters(true)}
-                className="lg:hidden flex items-center gap-2 px-4 py-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm text-neutral-300 hover:text-white transition-colors"
+                onClick={openFilters}
+                className="lg:hidden relative w-11 h-11 rounded-full bg-primary-600 text-white shadow-md shadow-primary-600/30 flex items-center justify-center active:scale-95 transition-transform"
               >
-                <SlidersHorizontal className="w-4 h-4" />
-                Filters
+                <SlidersHorizontal className="w-4.5 h-4.5" />
                 {activeFilterCount > 0 && (
-                  <span className="ml-1 px-1.5 py-0.5 bg-primary-600 text-white text-xs rounded-full">
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-white text-primary-700 text-xs font-bold rounded-full flex items-center justify-center">
                     {activeFilterCount}
                   </span>
                 )}
               </button>
 
               {!isLoading && filtered && (
-                <div className="flex items-center gap-2 text-sm text-neutral-500">
+                <div className="hidden lg:flex items-center gap-2 text-sm text-neutral-500">
                   <span>
                     {filtered.length} {filtered.length === 1 ? 'property' : 'properties'}
                     {activeFilterCount > 0 && ' matching'}
@@ -402,7 +371,79 @@ export default function ListingsPage() {
           </div>
         </div>
       </section>
+
     </div>
+  );
+}
+
+// --- Shared filter content ---
+
+function FilterContent({
+  statusFilter, setStatusFilter,
+  cityFilter, setCityFilter,
+  cities,
+  bedroomFilter, setBedroomFilter,
+  priceRange, setPriceRange,
+  sort, setSort,
+}: {
+  statusFilter: ListingStatus | '';
+  setStatusFilter: (v: ListingStatus | '') => void;
+  cityFilter: string;
+  setCityFilter: (v: string) => void;
+  cities: string[];
+  bedroomFilter: number | null;
+  setBedroomFilter: (v: number | null) => void;
+  priceRange: number | null;
+  setPriceRange: (v: number | null) => void;
+  sort: SortKey;
+  setSort: (v: SortKey) => void;
+}) {
+  return (
+    <>
+      <FilterGroup label="Status" icon={CircleDot}>
+        {STATUS_CONFIG.map(({ value, label, icon: StatusIcon }) => (
+          <Chip key={value} active={statusFilter === value} onClick={() => setStatusFilter(value)}>
+            <StatusIcon className="w-3.5 h-3.5" />
+            {label}
+          </Chip>
+        ))}
+      </FilterGroup>
+
+      {cities.length > 0 && (
+        <FilterGroup label="City" icon={MapPin}>
+          <Chip active={cityFilter === ''} onClick={() => setCityFilter('')}>All</Chip>
+          {cities.map((city) => (
+            <Chip key={city} active={cityFilter === city} onClick={() => setCityFilter(city)}>
+              {city}
+            </Chip>
+          ))}
+        </FilterGroup>
+      )}
+
+      <FilterGroup label="Beds" icon={Bed}>
+        <Chip active={bedroomFilter === null} onClick={() => setBedroomFilter(null)}>Any</Chip>
+        {BEDROOM_OPTIONS.map((n) => (
+          <Chip key={n} active={bedroomFilter === n} onClick={() => setBedroomFilter(bedroomFilter === n ? null : n)}>
+            {n === 5 ? '5+' : String(n)}
+          </Chip>
+        ))}
+      </FilterGroup>
+
+      <FilterGroup label="Price" icon={DollarSign}>
+        <Chip active={priceRange === null} onClick={() => setPriceRange(null)}>Any</Chip>
+        {PRICE_RANGES.map((range, i) => (
+          <Chip key={range.label} active={priceRange === i} onClick={() => setPriceRange(priceRange === i ? null : i)}>
+            {range.label}
+          </Chip>
+        ))}
+      </FilterGroup>
+
+      <FilterGroup label="Sort" icon={ArrowUpDown}>
+        {SORT_OPTIONS.map(({ key, label }) => (
+          <Chip key={key} active={sort === key} onClick={() => setSort(key)}>{label}</Chip>
+        ))}
+      </FilterGroup>
+    </>
   );
 }
 

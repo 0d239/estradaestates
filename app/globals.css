@@ -28,7 +28,7 @@
   }
 
   body {
-    @apply antialiased text-neutral-200 bg-black;
+    @apply antialiased text-neutral-100 bg-black;
     font-family: var(--font-display);
   }
 }
@@ -64,6 +64,10 @@
   animation: glow-pulse 3s ease-in-out infinite;
 }
 
+.calligraphy-glow {
+  filter: brightness(1.3) sepia(1) saturate(3) hue-rotate(10deg) drop-shadow(0 0 6px rgba(251, 191, 36, 0.5)) drop-shadow(0 0 16px rgba(251, 191, 36, 0.25));
+}
+
 @keyframes pan-bg {
   0% {
     background-position: 0% 50%;
@@ -82,3 +86,78 @@
   background-repeat: repeat-x;
   animation: pan-bg 60s ease-in-out infinite;
 }
+
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.25s ease-out;
+}
+
+/* Scroll-snap: non-linear scroll rhythm */
+.snap-scroll {
+  scroll-snap-type: y proximity;
+}
+
+.snap-section {
+  scroll-snap-align: start;
+  scroll-snap-stop: normal;
+}
+
+/* Scroll-driven reveal animations */
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(48px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes reveal-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes reveal-scale {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.reveal {
+  opacity: 0;
+}
+
+.reveal.is-visible {
+  animation: reveal-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.reveal-fade.is-visible {
+  animation: reveal-fade 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.reveal-scale {
+  opacity: 0;
+}
+
+.reveal-scale.is-visible {
+  animation: reveal-scale 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Stagger delays for cascading card entrances */
+.stagger-1 { animation-delay: 0ms; }
+.stagger-2 { animation-delay: 150ms; }
+.stagger-3 { animation-delay: 300ms; }
+.stagger-4 { animation-delay: 450ms; }
+.stagger-5 { animation-delay: 600ms; }
+
