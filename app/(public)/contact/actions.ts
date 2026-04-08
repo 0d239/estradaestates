@@ -1,14 +1,22 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
-import { leadFormSchema } from '@/lib/schemas/lead';
+import {
+  leadFormSchema,
+  INTEREST_BUYING,
+  INTEREST_SELLING,
+  INTEREST_DESIGN,
+} from '@/lib/schemas/lead';
 
 export async function submitLead(formData: FormData) {
   const raw = {
     name: formData.get('name'),
     phone: formData.get('phone'),
     email: formData.get('email'),
-    interest: formData.get('interest'),
+    wants_buying: formData.get('wants_buying'),
+    wants_selling: formData.get('wants_selling'),
+    wants_design: formData.get('wants_design'),
+    design_services: formData.getAll('design_services'),
     bedrooms_min: formData.get('bedrooms_min'),
     bathrooms_min: formData.get('bathrooms_min'),
     budget: formData.get('budget'),
@@ -25,13 +33,24 @@ export async function submitLead(formData: FormData) {
 
   const data = result.data;
 
+  // Compute bitmap: 1 = buying, 2 = selling, 4 = design
+  let interestFlags = 0;
+  if (data.wants_buying === 'true') interestFlags |= INTEREST_BUYING;
+  if (data.wants_selling === 'true') interestFlags |= INTEREST_SELLING;
+  if (data.wants_design === 'true') interestFlags |= INTEREST_DESIGN;
+
+  const designServices = Array.isArray(data.design_services)
+    ? data.design_services.filter(Boolean)
+    : data.design_services ? [data.design_services] : [];
+
   const supabase = await createClient();
   const { error } = await supabase.from('contacts').insert({
     type: 'lead',
     name: data.name,
     phone: data.phone || null,
     email: data.email || null,
-    interest: data.interest,
+    interest_flags: interestFlags,
+    design_services: designServices,
     bedrooms_min: typeof data.bedrooms_min === 'number' ? data.bedrooms_min : null,
     bathrooms_min: typeof data.bathrooms_min === 'number' ? data.bathrooms_min : null,
     budget: typeof data.budget === 'number' ? data.budget : null,

@@ -5,18 +5,27 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Search, Trash2, UserCheck, Building2, ArrowRightLeft, Eye, X } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/Button'
-import type { Contact, LeadInterest } from '@/lib/database.types'
+import type { Contact } from '@/lib/database.types'
+import { INTEREST_BUYING, INTEREST_SELLING, INTEREST_DESIGN } from '@/lib/schemas/lead'
 
-const interestColors: Record<LeadInterest, string> = {
-  buying: 'bg-blue-900/50 text-blue-300',
-  selling: 'bg-emerald-900/50 text-emerald-300',
-  both: 'bg-purple-900/50 text-purple-300',
+function interestLabels(flags: number): string[] {
+  const labels: string[] = []
+  if (flags & INTEREST_BUYING) labels.push('Buying')
+  if (flags & INTEREST_SELLING) labels.push('Selling')
+  if (flags & INTEREST_DESIGN) labels.push('Design')
+  return labels
+}
+
+const flagColors: Record<number, string> = {
+  [INTEREST_BUYING]: 'bg-blue-900/50 text-blue-300',
+  [INTEREST_SELLING]: 'bg-emerald-900/50 text-emerald-300',
+  [INTEREST_DESIGN]: 'bg-violet-900/50 text-violet-300',
 }
 
 export default function LeadsPage() {
   const queryClient = useQueryClient()
   const [search, setSearch] = useState('')
-  const [interestFilter, setInterestFilter] = useState<LeadInterest | ''>('')
+  const [interestFilter, setInterestFilter] = useState<number>(0)
   const [viewingLead, setViewingLead] = useState<Contact | null>(null)
   const [convertingLead, setConvertingLead] = useState<Contact | null>(null)
 
@@ -29,9 +38,8 @@ export default function LeadsPage() {
         .eq('type', 'lead')
         .order('created_at', { ascending: false })
 
-      if (interestFilter) {
-        query = query.eq('interest', interestFilter)
-      }
+      // Filter: if a specific bit is set, only show leads that have that bit
+      // This is done client-side since Supabase doesn't support bitwise ops directly
 
       const { data, error } = await query
       if (error) throw error
@@ -50,6 +58,7 @@ export default function LeadsPage() {
   })
 
   const filtered = leads?.filter((l) => {
+    if (interestFilter && !(l.interest_flags & interestFilter)) return false
     if (!search) return true
     const term = search.toLowerCase()
     return (
@@ -83,17 +92,17 @@ export default function LeadsPage() {
           />
         </div>
         <div className="flex gap-2">
-          <FilterButton active={interestFilter === ''} onClick={() => setInterestFilter('')}>
+          <FilterButton active={interestFilter === 0} onClick={() => setInterestFilter(0)}>
             All
           </FilterButton>
-          <FilterButton active={interestFilter === 'buying'} onClick={() => setInterestFilter('buying')}>
+          <FilterButton active={interestFilter === INTEREST_BUYING} onClick={() => setInterestFilter(INTEREST_BUYING)}>
             Buying
           </FilterButton>
-          <FilterButton active={interestFilter === 'selling'} onClick={() => setInterestFilter('selling')}>
+          <FilterButton active={interestFilter === INTEREST_SELLING} onClick={() => setInterestFilter(INTEREST_SELLING)}>
             Selling
           </FilterButton>
-          <FilterButton active={interestFilter === 'both'} onClick={() => setInterestFilter('both')}>
-            Both
+          <FilterButton active={interestFilter === INTEREST_DESIGN} onClick={() => setInterestFilter(INTEREST_DESIGN)}>
+            Design
           </FilterButton>
         </div>
       </div>
@@ -125,10 +134,16 @@ export default function LeadsPage() {
                     <p className="text-sm font-medium text-white">{lead.name}</p>
                   </td>
                   <td className="px-4 py-3">
-                    {lead.interest ? (
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium capitalize ${interestColors[lead.interest]}`}>
-                        {lead.interest === 'both' ? 'Buy & Sell' : lead.interest}
-                      </span>
+                    {lead.interest_flags ? (
+                      <div className="flex flex-wrap gap-1">
+                        {[INTEREST_BUYING, INTEREST_SELLING, INTEREST_DESIGN].map((flag) =>
+                          lead.interest_flags & flag ? (
+                            <span key={flag} className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${flagColors[flag]}`}>
+                              {flag === INTEREST_BUYING ? 'Buying' : flag === INTEREST_SELLING ? 'Selling' : 'Design'}
+                            </span>
+                          ) : null
+                        )}
+                      </div>
                     ) : (
                       <span className="text-xs text-neutral-500">—</span>
                     )}
@@ -212,9 +227,9 @@ function LeadDetailModal({ lead, onClose }: { lead: Contact; onClose: () => void
           <DetailRow label="Name" value={lead.name} />
           <DetailRow label="Phone" value={lead.phone} />
           <DetailRow label="Email" value={lead.email} />
-          <DetailRow label="Interest" value={lead.interest ? (lead.interest === 'both' ? 'Buying & Selling' : lead.interest.charAt(0).toUpperCase() + lead.interest.slice(1)) : null} />
+          <DetailRow label="Interest" value={interestLabels(lead.interest_flags).join(', ') || null} />
 
-          {(lead.interest === 'buying' || lead.interest === 'both') && (
+          {(lead.interest_flags & INTEREST_BUYING) !== 0 && (
             <div className="border-t border-neutral-800 pt-3">
               <p className="text-xs font-medium text-neutral-500 uppercase mb-2">Buyer Preferences</p>
               <div className="grid grid-cols-2 gap-3">
@@ -227,10 +242,17 @@ function LeadDetailModal({ lead, onClose }: { lead: Contact; onClose: () => void
             </div>
           )}
 
-          {(lead.interest === 'selling' || lead.interest === 'both') && (
+          {(lead.interest_flags & INTEREST_SELLING) !== 0 && (
             <div className="border-t border-neutral-800 pt-3">
               <p className="text-xs font-medium text-neutral-500 uppercase mb-2">Seller Details</p>
               <DetailRow label="Property Zip" value={lead.property_zipcode} />
+            </div>
+          )}
+
+          {(lead.interest_flags & INTEREST_DESIGN) !== 0 && (
+            <div className="border-t border-neutral-800 pt-3">
+              <p className="text-xs font-medium text-neutral-500 uppercase mb-2">Design Interest</p>
+              <DetailRow label="Services" value={lead.design_services?.length ? lead.design_services.join(', ') : 'General inquiry'} />
             </div>
           )}
 

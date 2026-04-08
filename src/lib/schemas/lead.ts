@@ -1,11 +1,19 @@
 import { z } from 'zod';
 
+// Interest bitmap: 1 = buying, 2 = selling, 4 = design (range 0–7)
+export const INTEREST_BUYING = 1;
+export const INTEREST_SELLING = 2;
+export const INTEREST_DESIGN = 4;
+
 export const leadFormSchema = z
   .object({
     name: z.string().min(1, 'Name is required'),
     phone: z.string().optional().default(''),
     email: z.string().email('Invalid email address').optional().or(z.literal('')).default(''),
-    interest: z.enum(['buying', 'selling', 'both']).default('buying'),
+    wants_buying: z.string().optional().default(''),
+    wants_selling: z.string().optional().default(''),
+    wants_design: z.string().optional().default(''),
+    design_services: z.union([z.string(), z.array(z.string())]).optional().default([]),
     // Buyer fields
     bedrooms_min: z.coerce.number().int().min(0).optional().or(z.literal('')),
     bathrooms_min: z.coerce.number().min(0).optional().or(z.literal('')),

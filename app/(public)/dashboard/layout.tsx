@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Users, Building2, MessageSquare, UserPlus, HelpCircle } from 'lucide-react'
+import { LayoutDashboard, Users, Building2, MessageSquare, UserPlus, Calendar, HelpCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
@@ -10,6 +10,7 @@ const navItems = [
   { href: '/dashboard/contacts', icon: Users, label: 'Contacts', exact: false },
   { href: '/dashboard/listings', icon: Building2, label: 'Listings', exact: false },
   { href: '/dashboard/leads', icon: UserPlus, label: 'Leads', exact: false },
+  { href: '/dashboard/calendar', icon: Calendar, label: 'Calendar', exact: false },
   { href: '/dashboard/communications', icon: MessageSquare, label: 'Messages', exact: false },
   { href: '/dashboard/help', icon: HelpCircle, label: 'Help', exact: false },
 ]

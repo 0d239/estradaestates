@@ -55,7 +55,7 @@ export const team: TeamMember[] = [
     title: 'Design + Property Value Strategist',
     phone: '',
     email: 'laura@levelupid.com',
-    image: '/laura_velasco.jpg',
+    image: 'https://levelupid.com/wp-content/uploads/2021/03/1-LauraVelasco.jpg',
     bio: 'With over 15 years of industry experience, Laura founded Level Up Interiors in 2018. Laura graduated from The Art Institute of CA–San Diego with a BS in Interior Design and served in the Army National Guard for 7 years as an Operations Specialist in the 670th MP Company. She started her career in model home merchandising at an award-winning design firm where she quickly mastered impactful and smart design to sell out communities. Laura has partnered with developers, property management groups, and asset managers, priding herself in customer service and long-lasting relationships.',
     specialties: [
       'Commercial Interior Design',

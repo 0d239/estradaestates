@@ -32,7 +32,8 @@ export function ContactForm({ contact, onClose }: ContactFormProps) {
     notes: contact?.notes ?? null,
     assigned_to: contact?.assigned_to ?? null,
     company: contact?.company ?? null,
-    interest: contact?.interest ?? null,
+    interest_flags: contact?.interest_flags ?? 0,
+    design_services: contact?.design_services ?? [],
     property_zipcode: contact?.property_zipcode ?? null,
   });
 

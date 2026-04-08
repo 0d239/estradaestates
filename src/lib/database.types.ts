@@ -1,5 +1,6 @@
 export type ContactType = 'client' | 'lead' | 'partner';
 export type ContactStatus = 'active' | 'inactive';
+/** @deprecated Use interest_flags bitmap instead: 1=buying, 2=selling, 4=design */
 export type LeadInterest = 'buying' | 'selling' | 'both';
 export type ListingStatus = 'active' | 'pending' | 'sold' | 'off_market';
 export type ListingSource = 'idx' | 'manual';
@@ -11,13 +12,19 @@ export type TeamRole = 'admin' | 'agent' | 'staff';
 export interface Database {
   public: {
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      get_email_by_username: {
+        Args: { lookup_username: string };
+        Returns: string;
+      };
+    };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
     Tables: {
       profiles: {
         Row: {
           id: string;
+          username: string | null;
           name: string;
           title: string | null;
           license: string | null;
@@ -31,6 +38,7 @@ export interface Database {
         };
         Insert: {
           id: string;
+          username?: string | null;
           name: string;
           title?: string | null;
           license?: string | null;
@@ -44,6 +52,7 @@ export interface Database {
         };
         Update: {
           id?: string;
+          username?: string | null;
           name?: string;
           title?: string | null;
           license?: string | null;
@@ -74,7 +83,8 @@ export interface Database {
           notes: string | null;
           assigned_to: string | null;
           company: string | null;
-          interest: LeadInterest | null;
+          interest_flags: number;
+          design_services: string[];
           property_zipcode: string | null;
           created_at: string;
           updated_at: string;
@@ -95,7 +105,8 @@ export interface Database {
           notes?: string | null;
           assigned_to?: string | null;
           company?: string | null;
-          interest?: LeadInterest | null;
+          interest_flags?: number;
+          design_services?: string[];
           property_zipcode?: string | null;
           created_at?: string;
           updated_at?: string;
@@ -116,7 +127,8 @@ export interface Database {
           notes?: string | null;
           assigned_to?: string | null;
           company?: string | null;
-          interest?: LeadInterest | null;
+          interest_flags?: number;
+          design_services?: string[];
           property_zipcode?: string | null;
           updated_at?: string;
         };

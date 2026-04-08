@@ -10,7 +10,7 @@ interface AuthContextType {
   user: User | null;
   profile: Profile | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
+  signIn: (username: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
 }
 
@@ -56,9 +56,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, [fetchProfile]);
 
-  async function signIn(email: string, password: string) {
+  async function signIn(username: string, password: string) {
+    // Look up email by username
+    const { data: email, error: lookupError } = await supabase.rpc('get_email_by_username', {
+      lookup_username: username.toLowerCase(),
+    });
+    if (lookupError || !email) {
+      return { error: new Error('Invalid username or password') };
+    }
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error: error ? new Error(error.message) : null };
+    return { error: error ? new Error('Invalid username or password') : null };
   }
 
   async function signOut() {

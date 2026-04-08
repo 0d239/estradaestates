@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { LogIn } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
@@ -10,31 +10,19 @@ import { useAuth } from '@/contexts/AuthContext';
 export default function LoginPage() {
   const { session, signIn } = useAuth();
   const router = useRouter();
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  useEffect(() => {
+    if (session) {
+      router.replace('/dashboard');
+    }
+  }, [session, router]);
+
   if (session) {
-    return (
-      <div className="min-h-[60vh] flex items-center justify-center py-12">
-        <div className="w-full max-w-md">
-          <Card>
-            <CardContent className="py-8 text-center space-y-4">
-              <p className="text-neutral-300">You&apos;re already signed in.</p>
-              <div className="flex gap-3 justify-center">
-                <Button variant="primary" onClick={() => router.push('/dashboard')}>
-                  Go to Dashboard
-                </Button>
-                <Button variant="outline" onClick={() => router.push('/')}>
-                  View Site
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -42,11 +30,13 @@ export default function LoginPage() {
     setError(null);
     setSubmitting(true);
 
-    const { error } = await signIn(email, password);
+    const { error } = await signIn(username, password);
     if (error) {
       setError(error.message);
+      setSubmitting(false);
+      return;
     }
-    setSubmitting(false);
+    router.push('/dashboard');
   }
 
   return (
@@ -56,10 +46,10 @@ export default function LoginPage() {
           <CardHeader>
             <div className="flex items-center gap-3">
               <LogIn className="w-6 h-6 text-primary-400" />
-              <h1 className="text-2xl font-bold text-white">Team Login</h1>
+              <h1 className="text-2xl font-bold text-white">Sign in</h1>
             </div>
             <p className="text-sm text-neutral-400 mt-1">
-              Sign in to access the dashboard
+              Access the dashboard
             </p>
           </CardHeader>
           <CardContent>
@@ -71,13 +61,15 @@ export default function LoginPage() {
               )}
               <div>
                 <label className="block text-sm font-medium text-neutral-300 mb-1">
-                  Email
+                  Username
                 </label>
                 <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="username"
+                  autoCapitalize="none"
+                  autoCorrect="off"
                   className="w-full px-3 py-2 bg-neutral-700 border border-neutral-600 rounded-lg text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
                   required
                 />

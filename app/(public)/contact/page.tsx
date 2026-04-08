@@ -3,7 +3,7 @@
 import { useActionState, useState } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Phone, Mail, CheckCircle } from 'lucide-react';
+import { Phone, Mail, CheckCircle, Home, TrendingUp, Paintbrush } from 'lucide-react';
 import { submitLead } from './actions';
 import { companyInfo } from '@/data/agents';
 
@@ -12,15 +12,18 @@ type FormState = {
   success?: boolean;
 } | null;
 
-type Interest = 'buying' | 'selling' | 'both';
-
 async function formAction(_prev: FormState, formData: FormData): Promise<FormState> {
   return await submitLead(formData);
 }
 
+const inputClass =
+  'w-full rounded-lg bg-neutral-700 border border-neutral-600 px-4 py-2.5 text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent';
+
 export default function ContactPage() {
   const [state, action, isPending] = useActionState(formAction, null);
-  const [interest, setInterest] = useState<Interest>('buying');
+  const [wantsBuying, setWantsBuying] = useState(false);
+  const [wantsSelling, setWantsSelling] = useState(false);
+  const [wantsDesign, setWantsDesign] = useState(false);
 
   if (state?.success) {
     return (
@@ -44,8 +47,8 @@ export default function ContactPage() {
         <div className="text-center mb-10">
           <h1 className="text-4xl font-bold text-white mb-4">Contact Us</h1>
           <p className="text-lg text-neutral-400 max-w-xl mx-auto">
-            Looking to buy or sell in San Benito County? Fill out the form below and
-            we&apos;ll get back to you as soon as possible.
+            Whether you&apos;re buying, selling, or looking for design services —
+            we&apos;re here to help. Fill out the form and we&apos;ll be in touch.
           </p>
         </div>
 
@@ -68,7 +71,7 @@ export default function ContactPage() {
                   name="name"
                   type="text"
                   required
-                  className="w-full rounded-lg bg-neutral-700 border border-neutral-600 px-4 py-2.5 text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className={inputClass}
                   placeholder="John Doe"
                 />
                 <FieldError errors={state?.error} field="name" />
@@ -84,7 +87,7 @@ export default function ContactPage() {
                     id="phone"
                     name="phone"
                     type="tel"
-                    className="w-full rounded-lg bg-neutral-700 border border-neutral-600 px-4 py-2.5 text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className={inputClass}
                     placeholder="(831) 555-0123"
                   />
                   <FieldError errors={state?.error} field="phone" />
@@ -97,7 +100,7 @@ export default function ContactPage() {
                     id="email"
                     name="email"
                     type="email"
-                    className="w-full rounded-lg bg-neutral-700 border border-neutral-600 px-4 py-2.5 text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className={inputClass}
                     placeholder="john@example.com"
                   />
                   <FieldError errors={state?.error} field="email" />
@@ -108,66 +111,59 @@ export default function ContactPage() {
                 <span className="text-primary-400">*</span> At least one of phone or email is required.
               </p>
 
-              {/* Interest toggle */}
+              {/* Service selection — select all that apply */}
               <div className="border-t border-neutral-700 pt-6">
-                <h3 className="text-lg font-medium text-white mb-1">I&apos;m interested in...</h3>
-                <p className="text-sm text-neutral-500 mb-4">This helps us connect you with the right agent.</p>
+                <h3 className="text-lg font-medium text-white mb-1">How can we help?</h3>
+                <p className="text-sm text-neutral-500 mb-4">Select all that apply.</p>
               </div>
 
-              <input type="hidden" name="interest" value={interest} />
-              <div className="flex gap-2">
-                {(['buying', 'selling', 'both'] as const).map((opt) => (
-                  <button
-                    key={opt}
-                    type="button"
-                    onClick={() => setInterest(opt)}
-                    className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors border ${
-                      interest === opt
-                        ? 'bg-primary-900/50 border-primary-500 text-primary-300'
-                        : 'bg-neutral-700 border-neutral-600 text-neutral-400 hover:text-white hover:border-neutral-500'
-                    }`}
-                  >
-                    {opt === 'both' ? 'Buying & Selling' : opt.charAt(0).toUpperCase() + opt.slice(1)}
-                  </button>
-                ))}
+              <input type="hidden" name="wants_buying" value={wantsBuying ? 'true' : ''} />
+              <input type="hidden" name="wants_selling" value={wantsSelling ? 'true' : ''} />
+              <input type="hidden" name="wants_design" value={wantsDesign ? 'true' : ''} />
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <ServiceToggle
+                  active={wantsBuying}
+                  onClick={() => setWantsBuying((v) => !v)}
+                  icon={<Home className="w-5 h-5" />}
+                  label="I want to buy"
+                  sublabel="Find my next home"
+                />
+                <ServiceToggle
+                  active={wantsSelling}
+                  onClick={() => setWantsSelling((v) => !v)}
+                  icon={<TrendingUp className="w-5 h-5" />}
+                  label="I want to sell"
+                  sublabel="List my property"
+                />
+                <ServiceToggle
+                  active={wantsDesign}
+                  onClick={() => setWantsDesign((v) => !v)}
+                  icon={<Paintbrush className="w-5 h-5" />}
+                  label="I need design"
+                  sublabel="Staging, renovation & more"
+                />
               </div>
 
               {/* Buyer preferences */}
-              {(interest === 'buying' || interest === 'both') && (
-                <>
-                  <div className="pt-2">
-                    <p className="text-sm font-medium text-neutral-400 mb-3">
-                      Buyer preferences <span className="text-neutral-600">(optional)</span>
-                    </p>
-                  </div>
+              {wantsBuying && (
+                <div className="space-y-4 rounded-lg border border-neutral-700 bg-neutral-800/50 p-5">
+                  <p className="text-sm font-medium text-primary-300">
+                    Buyer preferences <span className="text-neutral-600">(optional)</span>
+                  </p>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label htmlFor="bedrooms_min" className="block text-sm font-medium text-neutral-300 mb-1.5">
                         Min Bedrooms
                       </label>
-                      <input
-                        id="bedrooms_min"
-                        name="bedrooms_min"
-                        type="number"
-                        min="0"
-                        className="w-full rounded-lg bg-neutral-700 border border-neutral-600 px-4 py-2.5 text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                        placeholder="3"
-                      />
+                      <input id="bedrooms_min" name="bedrooms_min" type="number" min="0" className={inputClass} placeholder="3" />
                     </div>
                     <div>
                       <label htmlFor="bathrooms_min" className="block text-sm font-medium text-neutral-300 mb-1.5">
                         Min Bathrooms
                       </label>
-                      <input
-                        id="bathrooms_min"
-                        name="bathrooms_min"
-                        type="number"
-                        min="0"
-                        step="0.5"
-                        className="w-full rounded-lg bg-neutral-700 border border-neutral-600 px-4 py-2.5 text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                        placeholder="2"
-                      />
+                      <input id="bathrooms_min" name="bathrooms_min" type="number" min="0" step="0.5" className={inputClass} placeholder="2" />
                     </div>
                   </div>
 
@@ -176,81 +172,82 @@ export default function ContactPage() {
                       <label htmlFor="budget" className="block text-sm font-medium text-neutral-300 mb-1.5">
                         Budget
                       </label>
-                      <input
-                        id="budget"
-                        name="budget"
-                        type="number"
-                        min="0"
-                        className="w-full rounded-lg bg-neutral-700 border border-neutral-600 px-4 py-2.5 text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                        placeholder="500000"
-                      />
+                      <input id="budget" name="budget" type="number" min="0" className={inputClass} placeholder="500000" />
                     </div>
                     <div>
                       <label htmlFor="preferred_zipcode" className="block text-sm font-medium text-neutral-300 mb-1.5">
                         Preferred Zip
                       </label>
-                      <input
-                        id="preferred_zipcode"
-                        name="preferred_zipcode"
-                        type="text"
-                        className="w-full rounded-lg bg-neutral-700 border border-neutral-600 px-4 py-2.5 text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                        placeholder="95023"
-                      />
+                      <input id="preferred_zipcode" name="preferred_zipcode" type="text" className={inputClass} placeholder="95023" />
                     </div>
                     <div>
                       <label htmlFor="search_radius_miles" className="block text-sm font-medium text-neutral-300 mb-1.5">
                         Radius (mi)
                       </label>
-                      <input
-                        id="search_radius_miles"
-                        name="search_radius_miles"
-                        type="number"
-                        min="1"
-                        className="w-full rounded-lg bg-neutral-700 border border-neutral-600 px-4 py-2.5 text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                        placeholder="15"
-                      />
+                      <input id="search_radius_miles" name="search_radius_miles" type="number" min="1" className={inputClass} placeholder="15" />
                     </div>
                   </div>
-                </>
+                </div>
               )}
 
-              {/* Seller info */}
-              {(interest === 'selling' || interest === 'both') && (
-                <>
-                  <div className="pt-2">
-                    <p className="text-sm font-medium text-neutral-400 mb-3">
-                      Seller details <span className="text-neutral-600">(optional)</span>
-                    </p>
-                  </div>
+              {/* Seller details */}
+              {wantsSelling && (
+                <div className="space-y-4 rounded-lg border border-neutral-700 bg-neutral-800/50 p-5">
+                  <p className="text-sm font-medium text-primary-300">
+                    Seller details <span className="text-neutral-600">(optional)</span>
+                  </p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label htmlFor="property_zipcode" className="block text-sm font-medium text-neutral-300 mb-1.5">
                         Property Zip Code
                       </label>
-                      <input
-                        id="property_zipcode"
-                        name="property_zipcode"
-                        type="text"
-                        className="w-full rounded-lg bg-neutral-700 border border-neutral-600 px-4 py-2.5 text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                        placeholder="95023"
-                      />
+                      <input id="property_zipcode" name="property_zipcode" type="text" className={inputClass} placeholder="95023" />
                     </div>
                     <div>
-                      <label htmlFor="budget" className="block text-sm font-medium text-neutral-300 mb-1.5">
-                        {interest === 'both' ? 'Asking Price' : 'Estimated Value'}
+                      <label htmlFor="estimated_value" className="block text-sm font-medium text-neutral-300 mb-1.5">
+                        Estimated Value
                       </label>
                       <input
-                        id={interest === 'both' ? 'seller_budget' : 'budget'}
-                        name={interest === 'selling' ? 'budget' : undefined}
+                        id="estimated_value"
+                        name={!wantsBuying ? 'budget' : undefined}
                         type="number"
                         min="0"
-                        className="w-full rounded-lg bg-neutral-700 border border-neutral-600 px-4 py-2.5 text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                        className={inputClass}
                         placeholder="650000"
                       />
                     </div>
                   </div>
-                </>
+                </div>
+              )}
+
+              {/* Design details */}
+              {wantsDesign && (
+                <div className="space-y-4 rounded-lg border border-neutral-700 bg-neutral-800/50 p-5">
+                  <p className="text-sm font-medium text-primary-300">
+                    Design interest <span className="text-neutral-600">(optional)</span>
+                  </p>
+                  <p className="text-sm text-neutral-400">What type of design services are you interested in?</p>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      'Staging for sale',
+                      'Pre-purchase assessment',
+                      'New construction design',
+                      'Renovation / value-add',
+                    ].map((opt) => (
+                      <label key={opt} className="flex items-center gap-2.5 rounded-lg border border-neutral-600 bg-neutral-700/50 px-3 py-2.5 cursor-pointer hover:border-neutral-500 transition-colors has-[:checked]:border-primary-500 has-[:checked]:bg-primary-900/30">
+                        <input
+                          type="checkbox"
+                          name="design_services"
+                          value={opt}
+                          className="accent-primary-500 w-4 h-4"
+                        />
+                        <span className="text-sm text-neutral-300">{opt}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
               )}
 
               {/* Notes */}
@@ -262,7 +259,7 @@ export default function ContactPage() {
                   id="notes"
                   name="notes"
                   rows={3}
-                  className="w-full rounded-lg bg-neutral-700 border border-neutral-600 px-4 py-2.5 text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
+                  className={`${inputClass} resize-none`}
                   placeholder="Timeline, must-haves, areas of interest..."
                 />
               </div>
@@ -273,7 +270,7 @@ export default function ContactPage() {
               )}
 
               <Button type="submit" size="lg" className="w-full" disabled={isPending}>
-                {isPending ? 'Submitting...' : 'Submit'}
+                {isPending ? 'Submitting...' : 'Get in Touch'}
               </Button>
             </form>
           </CardContent>
@@ -292,6 +289,36 @@ export default function ContactPage() {
         </div>
       </section>
     </div>
+  );
+}
+
+function ServiceToggle({
+  active,
+  onClick,
+  icon,
+  label,
+  sublabel,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: React.ReactNode;
+  label: string;
+  sublabel: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex flex-col items-center gap-1.5 rounded-lg px-4 py-4 text-center transition-colors border ${
+        active
+          ? 'bg-primary-900/50 border-primary-500 text-primary-300'
+          : 'bg-neutral-700 border-neutral-600 text-neutral-400 hover:text-white hover:border-neutral-500'
+      }`}
+    >
+      {icon}
+      <span className="text-sm font-medium">{label}</span>
+      <span className="text-xs text-neutral-500">{sublabel}</span>
+    </button>
   );
 }
 

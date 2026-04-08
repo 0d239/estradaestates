@@ -16,7 +16,8 @@ export const contactSchema = z
     notes: z.string().nullable().optional(),
     assigned_to: z.string().uuid().nullable().optional(),
     company: z.string().nullable().optional(),
-    interest: z.enum(['buying', 'selling', 'both']).nullable().optional(),
+    interest_flags: z.coerce.number().int().min(0).max(7).optional().default(0),
+    design_services: z.array(z.string()).optional().default([]),
     property_zipcode: z.string().nullable().optional(),
   })
   .refine((data) => data.phone || data.email, {
