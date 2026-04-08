@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { ArrowLeft, Bed, Bath, Maximize, MapPin, Calendar, Hash } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { getListingTags } from '@/lib/utils';
 import type { Listing, Profile } from '@/lib/database.types';
 
 export default function ListingDetailPage() {
@@ -102,7 +103,7 @@ export default function ListingDetailPage() {
               </span>
             </div>
 
-            <div className="flex items-center gap-6 text-neutral-300 mb-8">
+            <div className="flex items-center gap-6 text-neutral-300 mb-4">
               {listing.bedrooms != null && (
                 <span className="flex items-center gap-2">
                   <Bed className="w-5 h-5" /> {listing.bedrooms} Beds
@@ -123,6 +124,14 @@ export default function ListingDetailPage() {
                   <Calendar className="w-5 h-5" /> Built {listing.year_built}
                 </span>
               )}
+            </div>
+
+            <div className="flex flex-wrap gap-2 mb-8">
+              {getListingTags(listing).map((tag) => (
+                <span key={tag} className="px-2.5 py-1 bg-neutral-800 border border-neutral-700 text-neutral-300 text-xs font-medium rounded-full">
+                  {tag}
+                </span>
+              ))}
             </div>
 
             {listing.description && (

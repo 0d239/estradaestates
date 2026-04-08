@@ -2,22 +2,52 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Search, Trash2, Pencil, Rss, PenLine, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Plus, Search, Trash2, Pencil, Rss, PenLine, ChevronLeft, ChevronRight, UserPlus, X, Check } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { getListingTags } from '@/lib/utils'
+import { logActivity } from '@/lib/activity-log'
+import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/Button'
 import { ListingForm } from '@/components/dashboard/ListingForm'
-import type { Listing, ListingStatus, ListingSource } from '@/lib/database.types'
+import type { Listing, ListingStatus, ListingSource, Profile, ListingAssignment } from '@/lib/database.types'
 
 const PAGE_SIZE = 15
 
 export default function DashboardListingsPage() {
   const queryClient = useQueryClient()
+  const { user } = useAuth()
   const [statusFilter, setStatusFilter] = useState<ListingStatus | ''>('')
   const [sourceFilter, setSourceFilter] = useState<ListingSource | ''>('')
   const [search, setSearch] = useState('')
   const [showForm, setShowForm] = useState(false)
   const [editingListing, setEditingListing] = useState<Listing | null>(null)
+  const [assigningListing, setAssigningListing] = useState<Listing | null>(null)
   const [page, setPage] = useState(0)
+
+  // Fetch all team profiles for assignment
+  const { data: profiles } = useQuery({
+    queryKey: ['profiles'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('name')
+      if (error) throw error
+      return data as Profile[]
+    },
+  })
+
+  // Fetch all assignments
+  const { data: assignments } = useQuery({
+    queryKey: ['listing_assignments'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('listing_assignments')
+        .select('*')
+      if (error) throw error
+      return data as ListingAssignment[]
+    },
+  })
 
   const { data: listings, isLoading } = useQuery({
     queryKey: ['listings', 'dashboard', statusFilter, sourceFilter],
@@ -42,8 +72,17 @@ export default function DashboardListingsPage() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
+      const listing = listings?.find((l) => l.id === id)
       const { error } = await supabase.from('listings').delete().eq('id', id)
       if (error) throw error
+
+      await logActivity({
+        actorId: user?.id ?? null,
+        action: 'listing_deleted',
+        entityType: 'listing',
+        entityId: id,
+        metadata: { address: listing?.address, status: listing?.status },
+      })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['listings'] })
@@ -123,6 +162,17 @@ export default function DashboardListingsPage() {
         <ListingForm listing={editingListing} onClose={handleCloseForm} />
       )}
 
+      {/* Assignment modal */}
+      {assigningListing && (
+        <AssignmentModal
+          listing={assigningListing}
+          profiles={profiles ?? []}
+          assignments={assignments?.filter((a) => a.listing_id === assigningListing.id) ?? []}
+          actorId={user?.id ?? null}
+          onClose={() => setAssigningListing(null)}
+        />
+      )}
+
       {/* Listings table */}
       {isLoading ? (
         <div className="text-center text-neutral-400 py-12">Loading listings...</div>
@@ -138,6 +188,7 @@ export default function DashboardListingsPage() {
                 <tr className="border-b border-neutral-800">
                   <th className="text-left px-3 sm:px-4 py-3 text-xs font-medium text-neutral-500 uppercase">Address</th>
                   <th className="text-left px-3 sm:px-4 py-3 text-xs font-medium text-neutral-500 uppercase">Status</th>
+                  <th className="text-left px-3 sm:px-4 py-3 text-xs font-medium text-neutral-500 uppercase">Agents</th>
                   <th className="text-left px-3 sm:px-4 py-3 text-xs font-medium text-neutral-500 uppercase hidden md:table-cell">Price</th>
                   <th className="text-left px-3 sm:px-4 py-3 text-xs font-medium text-neutral-500 uppercase hidden md:table-cell">Beds/Baths</th>
                   <th className="text-left px-3 sm:px-4 py-3 text-xs font-medium text-neutral-500 uppercase hidden lg:table-cell">MLS #</th>
@@ -153,6 +204,13 @@ export default function DashboardListingsPage() {
                       <p className="text-xs text-neutral-500">
                         {[listing.city, listing.state, listing.zip].filter(Boolean).join(', ')}
                       </p>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {getListingTags(listing).map((tag) => (
+                          <span key={tag} className="px-1.5 py-0.5 bg-neutral-800 text-neutral-500 text-[10px] rounded">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
                       {/* Show price on mobile under address */}
                       <p className="text-xs text-neutral-400 mt-0.5 md:hidden">
                         {listing.price ? `$${listing.price.toLocaleString()}` : ''}
@@ -168,6 +226,14 @@ export default function DashboardListingsPage() {
                       >
                         {listing.status.replace('_', ' ')}
                       </span>
+                    </td>
+                    <td className="px-3 sm:px-4 py-3">
+                      <AgentBadges
+                        listingId={listing.id}
+                        assignments={assignments}
+                        profiles={profiles}
+                        onAssign={() => setAssigningListing(listing)}
+                      />
                     </td>
                     <td className="px-3 sm:px-4 py-3 text-sm text-neutral-300 hidden md:table-cell">
                       {listing.price ? `$${listing.price.toLocaleString()}` : '—'}
@@ -244,6 +310,182 @@ export default function DashboardListingsPage() {
           )}
         </>
       )}
+    </div>
+  )
+}
+
+function AgentBadges({
+  listingId,
+  assignments,
+  profiles,
+  onAssign,
+}: {
+  listingId: string
+  assignments: ListingAssignment[] | undefined
+  profiles: Profile[] | undefined
+  onAssign: () => void
+}) {
+  const assigned = assignments?.filter((a) => a.listing_id === listingId) ?? []
+  const assignedProfiles = assigned
+    .map((a) => profiles?.find((p) => p.id === a.profile_id))
+    .filter(Boolean) as Profile[]
+
+  return (
+    <button
+      onClick={onAssign}
+      className="flex items-center gap-1 group"
+    >
+      {assignedProfiles.length > 0 ? (
+        <div className="flex -space-x-1.5">
+          {assignedProfiles.slice(0, 3).map((p) => (
+            <div
+              key={p.id}
+              className="w-6 h-6 rounded-full bg-primary-900/50 border border-neutral-700 flex items-center justify-center text-[10px] font-medium text-primary-300 overflow-hidden"
+              title={p.name}
+            >
+              {p.image_url ? (
+                <img src={p.image_url} alt={p.name} className="w-full h-full object-cover" />
+              ) : (
+                p.name.split(' ').map((n) => n[0]).join('').slice(0, 2)
+              )}
+            </div>
+          ))}
+          {assignedProfiles.length > 3 && (
+            <div className="w-6 h-6 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-[10px] text-neutral-400">
+              +{assignedProfiles.length - 3}
+            </div>
+          )}
+        </div>
+      ) : (
+        <span className="text-xs text-neutral-600 group-hover:text-neutral-400 transition-colors">
+          <UserPlus className="w-3.5 h-3.5" />
+        </span>
+      )}
+    </button>
+  )
+}
+
+function AssignmentModal({
+  listing,
+  profiles,
+  assignments,
+  actorId,
+  onClose,
+}: {
+  listing: Listing
+  profiles: Profile[]
+  assignments: ListingAssignment[]
+  actorId: string | null
+  onClose: () => void
+}) {
+  const queryClient = useQueryClient()
+
+  const assignMutation = useMutation({
+    mutationFn: async (profileId: string) => {
+      const { error } = await supabase
+        .from('listing_assignments')
+        .insert({ listing_id: listing.id, profile_id: profileId, assigned_by: actorId })
+      if (error) throw error
+
+      const profile = profiles.find((p) => p.id === profileId)
+      await logActivity({
+        actorId,
+        action: 'listing_assigned',
+        entityType: 'listing',
+        entityId: listing.id,
+        metadata: {
+          address: listing.address,
+          assigned_profile_id: profileId,
+          assigned_profile_name: profile?.name,
+        },
+      })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['listing_assignments'] })
+    },
+  })
+
+  const unassignMutation = useMutation({
+    mutationFn: async (profileId: string) => {
+      const { error } = await supabase
+        .from('listing_assignments')
+        .delete()
+        .eq('listing_id', listing.id)
+        .eq('profile_id', profileId)
+      if (error) throw error
+
+      const profile = profiles.find((p) => p.id === profileId)
+      await logActivity({
+        actorId,
+        action: 'listing_unassigned',
+        entityType: 'listing',
+        entityId: listing.id,
+        metadata: {
+          address: listing.address,
+          unassigned_profile_id: profileId,
+          unassigned_profile_name: profile?.name,
+        },
+      })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['listing_assignments'] })
+    },
+  })
+
+  const assignedIds = new Set(assignments.map((a) => a.profile_id))
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
+      <div className="bg-neutral-900 border border-neutral-800 rounded-xl w-full max-w-sm m-4" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between p-4 border-b border-neutral-800">
+          <div>
+            <h2 className="text-base font-semibold text-white">Assign Agents</h2>
+            <p className="text-xs text-neutral-500 mt-0.5 truncate">{listing.address}</p>
+          </div>
+          <button onClick={onClose} className="text-neutral-400 hover:text-white">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        <div className="p-2">
+          {profiles.map((profile) => {
+            const isAssigned = assignedIds.has(profile.id)
+            const isPending = assignMutation.isPending || unassignMutation.isPending
+            return (
+              <button
+                key={profile.id}
+                disabled={isPending}
+                onClick={() => {
+                  if (isAssigned) {
+                    unassignMutation.mutate(profile.id)
+                  } else {
+                    assignMutation.mutate(profile.id)
+                  }
+                }}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-neutral-800/50 transition-colors disabled:opacity-50"
+              >
+                <div className="w-8 h-8 rounded-full bg-primary-900/50 border border-neutral-700 flex items-center justify-center text-xs font-medium text-primary-300 overflow-hidden shrink-0">
+                  {profile.image_url ? (
+                    <img src={profile.image_url} alt={profile.name} className="w-full h-full object-cover" />
+                  ) : (
+                    profile.name.split(' ').map((n) => n[0]).join('').slice(0, 2)
+                  )}
+                </div>
+                <div className="flex-1 text-left min-w-0">
+                  <p className="text-sm text-white truncate">{profile.name}</p>
+                  {profile.title && <p className="text-xs text-neutral-500 truncate">{profile.title}</p>}
+                </div>
+                <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors ${
+                  isAssigned
+                    ? 'bg-primary-500 border-primary-400'
+                    : 'border-neutral-600'
+                }`}>
+                  {isAssigned && <Check className="w-3 h-3 text-neutral-900" />}
+                </div>
+              </button>
+            )
+          })}
+        </div>
+      </div>
     </div>
   )
 }

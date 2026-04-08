@@ -219,14 +219,6 @@ export function Header() {
       </div>
     </header>
 
-    {/* Calligraphy strip — static, below header */}
-    <div className="flex justify-center py-2 bg-white/10 border-b border-white/10 backdrop-blur-md">
-      <img
-        src="/company_caligraphy.png"
-        alt="Estrada Estates Realty Group"
-        className="h-8 md:h-10 w-auto"
-      />
-    </div>
     </>
   )
 }

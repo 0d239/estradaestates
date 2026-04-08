@@ -3,7 +3,7 @@
 import { useActionState, useState } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Phone, Mail, CheckCircle, Home, TrendingUp, Paintbrush } from 'lucide-react';
+import { Phone, Mail, CheckCircle, Home, TrendingUp, Palette } from 'lucide-react';
 import { submitLead } from './actions';
 import { companyInfo } from '@/data/agents';
 
@@ -46,102 +46,40 @@ export default function ContactPage() {
       <section className="container-narrow max-w-2xl mx-auto">
         <div className="text-center mb-10">
           <h1 className="text-4xl font-bold text-white mb-4">Contact Us</h1>
-          <p className="text-lg text-neutral-400 max-w-xl mx-auto">
-            Whether you&apos;re buying, selling, or looking for design services —
-            we&apos;re here to help. Fill out the form and we&apos;ll be in touch.
+          <p className="text-sm text-neutral-400 italic max-w-xl mx-auto">
+            Let us know how we can help.
           </p>
         </div>
 
         <Card>
           <CardHeader>
-            <h2 className="text-xl font-semibold text-white">Your Information</h2>
-            <p className="text-sm text-neutral-400 mt-1">
-              Name and at least one way to reach you are required.
-            </p>
+            <p className="text-sm text-neutral-400">Select all that apply</p>
           </CardHeader>
           <CardContent>
             <form action={action} className="space-y-6">
-              {/* Name */}
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-neutral-300 mb-1.5">
-                  Full Name <span className="text-primary-400">*</span>
-                </label>
-                <input
-                  id="name"
-                  name="name"
-                  type="text"
-                  required
-                  className={inputClass}
-                  placeholder="John Doe"
-                />
-                <FieldError errors={state?.error} field="name" />
-              </div>
-
-              {/* Contact info row */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-neutral-300 mb-1.5">
-                    Phone Number
-                  </label>
-                  <input
-                    id="phone"
-                    name="phone"
-                    type="tel"
-                    className={inputClass}
-                    placeholder="(831) 555-0123"
-                  />
-                  <FieldError errors={state?.error} field="phone" />
-                </div>
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-neutral-300 mb-1.5">
-                    Email
-                  </label>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    className={inputClass}
-                    placeholder="john@example.com"
-                  />
-                  <FieldError errors={state?.error} field="email" />
-                </div>
-              </div>
-
-              <p className="text-xs text-neutral-500 -mt-2">
-                <span className="text-primary-400">*</span> At least one of phone or email is required.
-              </p>
-
-              {/* Service selection — select all that apply */}
-              <div className="border-t border-neutral-700 pt-6">
-                <h3 className="text-lg font-medium text-white mb-1">How can we help?</h3>
-                <p className="text-sm text-neutral-500 mb-4">Select all that apply.</p>
-              </div>
 
               <input type="hidden" name="wants_buying" value={wantsBuying ? 'true' : ''} />
               <input type="hidden" name="wants_selling" value={wantsSelling ? 'true' : ''} />
               <input type="hidden" name="wants_design" value={wantsDesign ? 'true' : ''} />
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-3">
                 <ServiceToggle
                   active={wantsBuying}
                   onClick={() => setWantsBuying((v) => !v)}
                   icon={<Home className="w-5 h-5" />}
-                  label="I want to buy"
-                  sublabel="Find my next home"
+                  label="Buy"
                 />
                 <ServiceToggle
                   active={wantsSelling}
                   onClick={() => setWantsSelling((v) => !v)}
                   icon={<TrendingUp className="w-5 h-5" />}
-                  label="I want to sell"
-                  sublabel="List my property"
+                  label="Sell"
                 />
                 <ServiceToggle
                   active={wantsDesign}
                   onClick={() => setWantsDesign((v) => !v)}
-                  icon={<Paintbrush className="w-5 h-5" />}
-                  label="I need design"
-                  sublabel="Staging, renovation & more"
+                  icon={<Palette className="w-5 h-5" />}
+                  label="Design"
                 />
               </div>
 
@@ -149,7 +87,7 @@ export default function ContactPage() {
               {wantsBuying && (
                 <div className="space-y-4 rounded-lg border border-neutral-700 bg-neutral-800/50 p-5">
                   <p className="text-sm font-medium text-primary-300">
-                    Buyer preferences <span className="text-neutral-600">(optional)</span>
+                    Additional details <span className="text-neutral-600">(optional)</span>
                   </p>
 
                   <div className="grid grid-cols-2 gap-4">
@@ -194,7 +132,7 @@ export default function ContactPage() {
               {wantsSelling && (
                 <div className="space-y-4 rounded-lg border border-neutral-700 bg-neutral-800/50 p-5">
                   <p className="text-sm font-medium text-primary-300">
-                    Seller details <span className="text-neutral-600">(optional)</span>
+                    Additional details <span className="text-neutral-600">(optional)</span>
                   </p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -225,11 +163,11 @@ export default function ContactPage() {
               {wantsDesign && (
                 <div className="space-y-4 rounded-lg border border-neutral-700 bg-neutral-800/50 p-5">
                   <p className="text-sm font-medium text-primary-300">
-                    Design interest <span className="text-neutral-600">(optional)</span>
+                    Additional details <span className="text-neutral-600">(optional)</span>
                   </p>
                   <p className="text-sm text-neutral-400">What type of design services are you interested in?</p>
 
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {[
                       'Staging for sale',
                       'Pre-purchase assessment',
@@ -264,6 +202,62 @@ export default function ContactPage() {
                 />
               </div>
 
+              {/* Contact info */}
+              <div className="border-t border-neutral-700 pt-6">
+                <h3 className="text-lg font-medium text-white mb-1">Your Information</h3>
+                <p className="text-sm text-neutral-500 mb-4">
+                  Name and at least one way to reach you.
+                </p>
+              </div>
+
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-neutral-300 mb-1.5">
+                  Full Name <span className="text-primary-400">*</span>
+                </label>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  required
+                  className={inputClass}
+                  placeholder="John Doe"
+                />
+                <FieldError errors={state?.error} field="name" />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="phone" className="block text-sm font-medium text-neutral-300 mb-1.5">
+                    Phone Number
+                  </label>
+                  <input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    className={inputClass}
+                    placeholder="(831) 555-0123"
+                  />
+                  <FieldError errors={state?.error} field="phone" />
+                </div>
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-neutral-300 mb-1.5">
+                    Email
+                  </label>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    className={inputClass}
+                    placeholder="john@example.com"
+                  />
+                  <FieldError errors={state?.error} field="email" />
+                </div>
+              </div>
+
+              <p className="text-xs text-neutral-500 -mt-2">
+                <span className="text-primary-400">*</span> At least one of phone or email is required.
+              </p>
+
               {/* Form-level error */}
               {state?.error?._form && (
                 <p className="text-sm text-red-400">{state.error._form[0]}</p>
@@ -297,19 +291,17 @@ function ServiceToggle({
   onClick,
   icon,
   label,
-  sublabel,
 }: {
   active: boolean;
   onClick: () => void;
   icon: React.ReactNode;
   label: string;
-  sublabel: string;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`flex flex-col items-center gap-1.5 rounded-lg px-4 py-4 text-center transition-colors border ${
+      className={`flex flex-col items-center gap-1 rounded-lg px-2 py-3 sm:px-4 sm:py-4 sm:gap-1.5 text-center transition-colors border ${
         active
           ? 'bg-primary-900/50 border-primary-500 text-primary-300'
           : 'bg-neutral-700 border-neutral-600 text-neutral-400 hover:text-white hover:border-neutral-500'
@@ -317,7 +309,6 @@ function ServiceToggle({
     >
       {icon}
       <span className="text-sm font-medium">{label}</span>
-      <span className="text-xs text-neutral-500">{sublabel}</span>
     </button>
   );
 }

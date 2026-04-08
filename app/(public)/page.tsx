@@ -101,10 +101,7 @@ export default function TeamPage() {
         <h1 className="text-4xl font-bold text-white mb-4">
           Welcome to {companyInfo.name}
         </h1>
-        <p className="text-lg text-neutral-400 max-w-2xl mx-auto mb-2">
-          Expert knowledge and decades of experience helping you achieve your real estate goals.
-        </p>
-        <p className="text-xs text-neutral-500 mb-10">
+        <p className="text-sm text-neutral-500 mb-10">
           A d/b/a of {companyInfo.legalName}
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-xl mx-auto">

@@ -1,6 +1,7 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query';
+import { getListingTags } from '@/lib/utils';
 import {
   Bed,
   Bath,
@@ -115,11 +116,20 @@ const BEDROOM_OPTIONS = [1, 2, 3, 4, 5] as const;
 // --- Main page ---
 
 export default function ListingsPage() {
-  const [statusFilter, setStatusFilter] = useState<ListingStatus | ''>('active');
-  const [cityFilter, setCityFilter] = useState<string>('');
-  const [bedroomFilter, setBedroomFilter] = useState<number | null>(null);
-  const [priceRange, setPriceRange] = useState<number | null>(null);
+  const [statusFilters, setStatusFilters] = useState<Set<ListingStatus>>(new Set(['active']));
+  const [cityFilters, setCityFilters] = useState<Set<string>>(new Set());
+  const [bedroomFilters, setBedroomFilters] = useState<Set<number>>(new Set());
+  const [priceRanges, setPriceRanges] = useState<Set<number>>(new Set());
   const [sort, setSort] = useState<SortKey>('newest');
+
+  const toggleInSet = <T,>(setter: React.Dispatch<React.SetStateAction<Set<T>>>, value: T) => {
+    setter((prev) => {
+      const next = new Set(prev);
+      if (next.has(value)) next.delete(value);
+      else next.add(value);
+      return next;
+    });
+  };
 
   const { data: listings, isLoading } = useQuery({
     queryKey: ['listings', 'public'],
@@ -143,12 +153,12 @@ export default function ListingsPage() {
     return Array.from(citySet).sort();
   }, [listings]);
 
-  // Count active filters
+  // Count active filters (status defaults to 'active' so only count if changed)
   const activeFilterCount = [
-    statusFilter !== 'active' && statusFilter !== '',
-    cityFilter,
-    bedroomFilter,
-    priceRange !== null,
+    !(statusFilters.size === 1 && statusFilters.has('active')),
+    cityFilters.size > 0,
+    bedroomFilters.size > 0,
+    priceRanges.size > 0,
   ].filter(Boolean).length;
 
   // Apply filters
@@ -156,19 +166,22 @@ export default function ListingsPage() {
     if (!listings) return [];
 
     let result = listings.filter((l) => {
-      if (statusFilter && l.status !== statusFilter) return false;
-      if (cityFilter && l.city !== cityFilter) return false;
-      if (bedroomFilter !== null) {
-        if (bedroomFilter === 5) {
-          if ((l.bedrooms ?? 0) < 5) return false;
-        } else {
-          if (l.bedrooms !== bedroomFilter) return false;
-        }
+      if (statusFilters.size > 0 && !statusFilters.has(l.status as ListingStatus)) return false;
+      if (cityFilters.size > 0 && !cityFilters.has(l.city ?? '')) return false;
+      if (bedroomFilters.size > 0) {
+        const beds = l.bedrooms ?? 0;
+        const matches = Array.from(bedroomFilters).some((b) =>
+          b === 5 ? beds >= 5 : beds === b
+        );
+        if (!matches) return false;
       }
-      if (priceRange !== null) {
-        const range = PRICE_RANGES[priceRange];
+      if (priceRanges.size > 0) {
         const price = l.price ?? 0;
-        if (price < range.min || price >= range.max) return false;
+        const matches = Array.from(priceRanges).some((i) => {
+          const range = PRICE_RANGES[i];
+          return price >= range.min && price < range.max;
+        });
+        if (!matches) return false;
       }
       return true;
     });
@@ -188,13 +201,13 @@ export default function ListingsPage() {
     });
 
     return result;
-  }, [listings, statusFilter, cityFilter, bedroomFilter, priceRange, sort]);
+  }, [listings, statusFilters, cityFilters, bedroomFilters, priceRanges, sort]);
 
   function clearAll() {
-    setStatusFilter('active');
-    setCityFilter('');
-    setBedroomFilter(null);
-    setPriceRange(null);
+    setStatusFilters(new Set(['active']));
+    setCityFilters(new Set());
+    setBedroomFilters(new Set());
+    setPriceRanges(new Set());
     setSort('newest');
   }
 
@@ -226,55 +239,20 @@ export default function ListingsPage() {
 
         <div className="flex gap-8">
           {/* Sidebar filters — always visible on lg+, toggleable on mobile */}
-          {/* Mobile centered modal filters */}
-          <div
-            className={cn(
-              'fixed inset-0 z-[60] bg-black/40 backdrop-blur-xl transition-opacity lg:hidden flex flex-col',
-              showFilters ? 'opacity-100' : 'opacity-0 pointer-events-none'
-            )}
-            onClick={() => setShowFilters(false)}
-          >
-            <div
-              className="flex-1 flex flex-col px-6 pt-14 pb-8 overflow-y-auto overscroll-contain"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-                  <SlidersHorizontal className="w-5 h-5" />
-                  Filters
-                </h2>
-                <div className="flex items-center gap-3">
-                  {activeFilterCount > 0 && (
-                    <button
-                      type="button"
-                      onClick={clearAll}
-                      className="text-xs text-neutral-400 hover:text-primary-400 transition-colors"
-                    >
-                      Clear all
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => setShowFilters(false)}
-                    className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-neutral-300 hover:text-white transition-colors"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-
-              <div className="space-y-6 flex-1">
-                <FilterContent
-                  statusFilter={statusFilter} setStatusFilter={setStatusFilter}
-                  cityFilter={cityFilter} setCityFilter={setCityFilter}
-                  cities={cities}
-                  bedroomFilter={bedroomFilter} setBedroomFilter={setBedroomFilter}
-                  priceRange={priceRange} setPriceRange={setPriceRange}
-                  sort={sort} setSort={setSort}
-                />
-              </div>
-            </div>
-          </div>
+          {/* Mobile modal filters */}
+          <MobileFilters
+            open={showFilters}
+            onClose={() => setShowFilters(false)}
+            activeFilterCount={activeFilterCount}
+            onClear={clearAll}
+            resultCount={filtered?.length ?? 0}
+            statusFilters={statusFilters} toggleStatus={(v) => toggleInSet(setStatusFilters, v)} clearStatuses={() => setStatusFilters(new Set())}
+            cityFilters={cityFilters} toggleCity={(v) => toggleInSet(setCityFilters, v)} clearCities={() => setCityFilters(new Set())}
+            cities={cities}
+            bedroomFilters={bedroomFilters} toggleBedroom={(v) => toggleInSet(setBedroomFilters, v)} clearBedrooms={() => setBedroomFilters(new Set())}
+            priceRanges={priceRanges} togglePriceRange={(v) => toggleInSet(setPriceRanges, v)} clearPriceRanges={() => setPriceRanges(new Set())}
+            sort={sort} setSort={setSort}
+          />
 
           {/* Desktop sidebar filters */}
           <aside className="hidden lg:block w-72 shrink-0">
@@ -296,11 +274,11 @@ export default function ListingsPage() {
               </div>
               <div className="space-y-5">
                 <FilterContent
-                  statusFilter={statusFilter} setStatusFilter={setStatusFilter}
-                  cityFilter={cityFilter} setCityFilter={setCityFilter}
+                  statusFilters={statusFilters} toggleStatus={(v) => toggleInSet(setStatusFilters, v)} clearStatuses={() => setStatusFilters(new Set())}
+                  cityFilters={cityFilters} toggleCity={(v) => toggleInSet(setCityFilters, v)} clearCities={() => setCityFilters(new Set())}
                   cities={cities}
-                  bedroomFilter={bedroomFilter} setBedroomFilter={setBedroomFilter}
-                  priceRange={priceRange} setPriceRange={setPriceRange}
+                  bedroomFilters={bedroomFilters} toggleBedroom={(v) => toggleInSet(setBedroomFilters, v)} clearBedrooms={() => setBedroomFilters(new Set())}
+                  priceRanges={priceRanges} togglePriceRange={(v) => toggleInSet(setPriceRanges, v)} clearPriceRanges={() => setPriceRanges(new Set())}
                   sort={sort} setSort={setSort}
                 />
               </div>
@@ -376,33 +354,314 @@ export default function ListingsPage() {
   );
 }
 
-// --- Shared filter content ---
+// --- Mobile accordion filter modal ---
 
-function FilterContent({
-  statusFilter, setStatusFilter,
-  cityFilter, setCityFilter,
-  cities,
-  bedroomFilter, setBedroomFilter,
-  priceRange, setPriceRange,
-  sort, setSort,
-}: {
-  statusFilter: ListingStatus | '';
-  setStatusFilter: (v: ListingStatus | '') => void;
-  cityFilter: string;
-  setCityFilter: (v: string) => void;
+type FilterSection = 'status' | 'city' | 'beds' | 'price' | 'sort';
+
+interface MultiFilterProps {
+  statusFilters: Set<ListingStatus>;
+  toggleStatus: (v: ListingStatus) => void;
+  clearStatuses: () => void;
+  cityFilters: Set<string>;
+  toggleCity: (v: string) => void;
+  clearCities: () => void;
   cities: string[];
-  bedroomFilter: number | null;
-  setBedroomFilter: (v: number | null) => void;
-  priceRange: number | null;
-  setPriceRange: (v: number | null) => void;
+  bedroomFilters: Set<number>;
+  toggleBedroom: (v: number) => void;
+  clearBedrooms: () => void;
+  priceRanges: Set<number>;
+  togglePriceRange: (v: number) => void;
+  clearPriceRanges: () => void;
   sort: SortKey;
   setSort: (v: SortKey) => void;
+}
+
+function summarizeFilter(
+  section: FilterSection,
+  props: MultiFilterProps
+): string {
+  switch (section) {
+    case 'status': {
+      if (props.statusFilters.size === 0) return 'All';
+      return STATUS_CONFIG
+        .filter((s) => s.value && props.statusFilters.has(s.value as ListingStatus))
+        .map((s) => s.label)
+        .join(', ') || 'All';
+    }
+    case 'city':
+      return props.cityFilters.size === 0
+        ? 'All'
+        : Array.from(props.cityFilters).join(', ');
+    case 'beds':
+      return props.bedroomFilters.size === 0
+        ? 'Any'
+        : Array.from(props.bedroomFilters)
+            .sort()
+            .map((n) => (n === 5 ? '5+' : String(n)))
+            .join(', ');
+    case 'price':
+      return props.priceRanges.size === 0
+        ? 'Any'
+        : Array.from(props.priceRanges)
+            .sort()
+            .map((i) => PRICE_RANGES[i].label)
+            .join(', ');
+    case 'sort':
+      return SORT_OPTIONS.find((o) => o.key === props.sort)?.label ?? '';
+  }
+}
+
+const FILTER_SECTIONS: { key: FilterSection; label: string; icon: React.ElementType }[] = [
+  { key: 'status', label: 'Status', icon: CircleDot },
+  { key: 'city', label: 'City', icon: MapPin },
+  { key: 'beds', label: 'Beds', icon: Bed },
+  { key: 'price', label: 'Price', icon: DollarSign },
+  { key: 'sort', label: 'Sort', icon: ArrowUpDown },
+];
+
+function MobileFilterAccordionRow({
+  label,
+  icon: Icon,
+  expanded,
+  onToggle,
+  onClear,
+  hasSelection,
+  summary,
+  children,
+}: {
+  label: string;
+  icon: React.ElementType;
+  expanded: boolean;
+  onToggle: () => void;
+  onClear?: () => void;
+  hasSelection: boolean;
+  summary: string;
+  children: React.ReactNode;
 }) {
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={onToggle}
+        className={cn(
+          'w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors',
+          expanded ? 'bg-neutral-800/60' : 'hover:bg-neutral-800/30'
+        )}
+      >
+        <Icon className="w-4 h-4 text-neutral-500 shrink-0" />
+        <span className="text-sm font-medium text-white">{label}</span>
+        <span className="ml-auto text-xs text-neutral-500 truncate max-w-[50%] text-right">
+          {summary}
+        </span>
+        <svg
+          className={cn(
+            'w-4 h-4 text-neutral-500 shrink-0 transition-transform',
+            expanded && 'rotate-180'
+          )}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      <div
+        className={cn(
+          'overflow-hidden transition-all',
+          expanded ? 'max-h-48 opacity-100 mt-2 mb-1' : 'max-h-0 opacity-0'
+        )}
+      >
+        <div className="flex flex-wrap items-center gap-1.5 px-4">
+          {children}
+          {hasSelection && onClear && (
+            <button
+              type="button"
+              onClick={onClear}
+              className="ml-auto text-[11px] text-neutral-500 hover:text-primary-400 transition-colors"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function sectionHasSelection(section: FilterSection, props: MultiFilterProps): boolean {
+  switch (section) {
+    case 'status': return props.statusFilters.size > 0;
+    case 'city': return props.cityFilters.size > 0;
+    case 'beds': return props.bedroomFilters.size > 0;
+    case 'price': return props.priceRanges.size > 0;
+    case 'sort': return false; // sort always has a value, no "clear"
+  }
+}
+
+function sectionClear(section: FilterSection, props: MultiFilterProps) {
+  switch (section) {
+    case 'status': return props.clearStatuses;
+    case 'city': return props.clearCities;
+    case 'beds': return props.clearBedrooms;
+    case 'price': return props.clearPriceRanges;
+    case 'sort': return undefined;
+  }
+}
+
+function MobileFilters({
+  open, onClose, activeFilterCount, onClear, resultCount,
+  ...filterProps
+}: {
+  open: boolean;
+  onClose: () => void;
+  activeFilterCount: number;
+  onClear: () => void;
+  resultCount: number;
+} & MultiFilterProps) {
+  const [expanded, setExpanded] = useState<FilterSection | null>(null);
+
+  const toggle = (section: FilterSection) =>
+    setExpanded((prev) => (prev === section ? null : section));
+
+  return (
+    <div
+      className={cn(
+        'fixed inset-0 z-[60] bg-black/40 backdrop-blur-xl transition-opacity lg:hidden flex items-center justify-center',
+        open ? 'opacity-100' : 'opacity-0 pointer-events-none'
+      )}
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-sm mx-6"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between mb-4">
+          <button
+            type="button"
+            onClick={onClear}
+            className={cn(
+              'text-xs transition-colors w-16',
+              activeFilterCount > 0
+                ? 'text-neutral-400 hover:text-primary-400'
+                : 'invisible'
+            )}
+          >
+            Clear all
+          </button>
+          <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+            <SlidersHorizontal className="w-5 h-5" />
+            Filters
+          </h2>
+          <div className="w-16 flex justify-end">
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-neutral-300 hover:text-white transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Accordion sections */}
+        <div className="space-y-1">
+          {FILTER_SECTIONS.map(({ key, label, icon }) => (
+            <MobileFilterAccordionRow
+              key={key}
+              label={label}
+              icon={icon}
+              expanded={expanded === key}
+              onToggle={() => toggle(key)}
+              summary={summarizeFilter(key, filterProps)}
+              hasSelection={sectionHasSelection(key, filterProps)}
+              onClear={sectionClear(key, filterProps)}
+            >
+              {key === 'status' && (
+                <>
+                  <Chip active={filterProps.statusFilters.size === 0} onClick={filterProps.clearStatuses}>All</Chip>
+                  {STATUS_CONFIG.filter((s) => s.value).map(({ value, label: l, icon: StatusIcon }) => (
+                    <Chip key={value} active={filterProps.statusFilters.has(value as ListingStatus)} onClick={() => filterProps.toggleStatus(value as ListingStatus)}>
+                      <StatusIcon className="w-3.5 h-3.5" />
+                      {l}
+                    </Chip>
+                  ))}
+                </>
+              )}
+
+              {key === 'city' && (
+                <>
+                  <Chip active={filterProps.cityFilters.size === 0} onClick={filterProps.clearCities}>All</Chip>
+                  {filterProps.cities.map((city) => (
+                    <Chip key={city} active={filterProps.cityFilters.has(city)} onClick={() => filterProps.toggleCity(city)}>
+                      {city}
+                    </Chip>
+                  ))}
+                </>
+              )}
+
+              {key === 'beds' && (
+                <>
+                  <Chip active={filterProps.bedroomFilters.size === 0} onClick={filterProps.clearBedrooms}>Any</Chip>
+                  {BEDROOM_OPTIONS.map((n) => (
+                    <Chip key={n} active={filterProps.bedroomFilters.has(n)} onClick={() => filterProps.toggleBedroom(n)}>
+                      {n === 5 ? '5+' : String(n)}
+                    </Chip>
+                  ))}
+                </>
+              )}
+
+              {key === 'price' && (
+                <>
+                  <Chip active={filterProps.priceRanges.size === 0} onClick={filterProps.clearPriceRanges}>Any</Chip>
+                  {PRICE_RANGES.map((range, i) => (
+                    <Chip key={range.label} active={filterProps.priceRanges.has(i)} onClick={() => filterProps.togglePriceRange(i)}>
+                      {range.label}
+                    </Chip>
+                  ))}
+                </>
+              )}
+
+              {key === 'sort' && SORT_OPTIONS.map(({ key: k, label: l }) => (
+                <Chip key={k} active={filterProps.sort === k} onClick={() => filterProps.setSort(k)}>{l}</Chip>
+              ))}
+            </MobileFilterAccordionRow>
+          ))}
+        </div>
+
+        {/* Results button */}
+        <button
+          type="button"
+          onClick={onClose}
+          className="w-full mt-5 py-3 rounded-xl bg-primary-600 text-white text-sm font-medium hover:bg-primary-500 active:scale-[0.98] transition-all"
+        >
+          Show {resultCount} {resultCount === 1 ? 'property' : 'properties'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// --- Shared filter content (desktop sidebar) ---
+
+function FilterContent({
+  statusFilters, toggleStatus, clearStatuses,
+  cityFilters, toggleCity, clearCities,
+  cities,
+  bedroomFilters, toggleBedroom, clearBedrooms,
+  priceRanges, togglePriceRange, clearPriceRanges,
+  sort, setSort,
+}: MultiFilterProps) {
   return (
     <>
       <FilterGroup label="Status" icon={CircleDot}>
-        {STATUS_CONFIG.map(({ value, label, icon: StatusIcon }) => (
-          <Chip key={value} active={statusFilter === value} onClick={() => setStatusFilter(value)}>
+        <Chip active={statusFilters.size === 0} onClick={clearStatuses}>
+          <Home className="w-3.5 h-3.5" />
+          All
+        </Chip>
+        {STATUS_CONFIG.filter((s) => s.value).map(({ value, label, icon: StatusIcon }) => (
+          <Chip key={value} active={statusFilters.has(value as ListingStatus)} onClick={() => toggleStatus(value as ListingStatus)}>
             <StatusIcon className="w-3.5 h-3.5" />
             {label}
           </Chip>
@@ -411,9 +670,9 @@ function FilterContent({
 
       {cities.length > 0 && (
         <FilterGroup label="City" icon={MapPin}>
-          <Chip active={cityFilter === ''} onClick={() => setCityFilter('')}>All</Chip>
+          <Chip active={cityFilters.size === 0} onClick={clearCities}>All</Chip>
           {cities.map((city) => (
-            <Chip key={city} active={cityFilter === city} onClick={() => setCityFilter(city)}>
+            <Chip key={city} active={cityFilters.has(city)} onClick={() => toggleCity(city)}>
               {city}
             </Chip>
           ))}
@@ -421,18 +680,18 @@ function FilterContent({
       )}
 
       <FilterGroup label="Beds" icon={Bed}>
-        <Chip active={bedroomFilter === null} onClick={() => setBedroomFilter(null)}>Any</Chip>
+        <Chip active={bedroomFilters.size === 0} onClick={clearBedrooms}>Any</Chip>
         {BEDROOM_OPTIONS.map((n) => (
-          <Chip key={n} active={bedroomFilter === n} onClick={() => setBedroomFilter(bedroomFilter === n ? null : n)}>
+          <Chip key={n} active={bedroomFilters.has(n)} onClick={() => toggleBedroom(n)}>
             {n === 5 ? '5+' : String(n)}
           </Chip>
         ))}
       </FilterGroup>
 
       <FilterGroup label="Price" icon={DollarSign}>
-        <Chip active={priceRange === null} onClick={() => setPriceRange(null)}>Any</Chip>
+        <Chip active={priceRanges.size === 0} onClick={clearPriceRanges}>Any</Chip>
         {PRICE_RANGES.map((range, i) => (
-          <Chip key={range.label} active={priceRange === i} onClick={() => setPriceRange(priceRange === i ? null : i)}>
+          <Chip key={range.label} active={priceRanges.has(i)} onClick={() => togglePriceRange(i)}>
             {range.label}
           </Chip>
         ))}
@@ -506,6 +765,13 @@ function ListingCard({ listing }: { listing: Listing }) {
               <Maximize className="w-3.5 h-3.5" /> {listing.sqft.toLocaleString()} sqft
             </span>
           )}
+        </div>
+        <div className="flex flex-wrap gap-1.5 mt-3">
+          {getListingTags(listing).map((tag) => (
+            <span key={tag} className="px-2 py-0.5 bg-neutral-800 text-neutral-400 text-[10px] font-medium rounded-full">
+              {tag}
+            </span>
+          ))}
         </div>
       </div>
     </Link>

@@ -5,6 +5,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X } from 'lucide-react';
 import { contactSchema, type ContactFormData } from '@/lib/schemas/contact';
 import { supabase } from '@/lib/supabase';
+import { logActivity } from '@/lib/activity-log';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/Button';
 import type { Contact } from '@/lib/database.types';
 
@@ -15,6 +17,7 @@ interface ContactFormProps {
 
 export function ContactForm({ contact, onClose }: ContactFormProps) {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const isEditing = !!contact;
 
   const [formData, setFormData] = useState<ContactFormData>({
@@ -41,15 +44,37 @@ export function ContactForm({ contact, onClose }: ContactFormProps) {
 
   const mutation = useMutation({
     mutationFn: async (data: ContactFormData) => {
+      const actorId = user?.id ?? null;
+
       if (isEditing) {
         const { error } = await supabase
           .from('contacts')
           .update(data)
           .eq('id', contact!.id);
         if (error) throw error;
+
+        await logActivity({
+          actorId,
+          action: 'contact_updated',
+          entityType: 'contact',
+          entityId: contact!.id,
+          metadata: { name: data.name, type: data.type },
+        });
       } else {
-        const { error } = await supabase.from('contacts').insert(data);
+        const { data: inserted, error } = await supabase
+          .from('contacts')
+          .insert(data)
+          .select('id')
+          .single();
         if (error) throw error;
+
+        await logActivity({
+          actorId,
+          action: 'contact_created',
+          entityType: 'contact',
+          entityId: inserted.id,
+          metadata: { name: data.name, type: data.type },
+        });
       }
     },
     onSuccess: () => {

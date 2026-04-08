@@ -9,6 +9,15 @@ export type CommunicationChannel = 'sms' | 'email';
 export type CommunicationRecipientStatus = 'sent' | 'delivered' | 'failed';
 export type TeamRole = 'admin' | 'agent' | 'staff';
 
+export type ActivityAction =
+  | 'listing_created' | 'listing_updated' | 'listing_status_changed' | 'listing_deleted'
+  | 'listing_assigned' | 'listing_unassigned'
+  | 'contact_created' | 'contact_updated' | 'contact_deleted'
+  | 'lead_created' | 'lead_converted' | 'lead_deleted'
+  | 'note_added';
+
+export type ActivityEntityType = 'listing' | 'contact' | 'lead' | 'assignment';
+
 export interface Database {
   public: {
     Views: Record<string, never>;
@@ -270,6 +279,52 @@ export interface Database {
         };
         Relationships: [];
       };
+      listing_assignments: {
+        Row: {
+          id: string;
+          listing_id: string;
+          profile_id: string;
+          assigned_at: string;
+          assigned_by: string | null;
+        };
+        Insert: {
+          id?: string;
+          listing_id: string;
+          profile_id: string;
+          assigned_at?: string;
+          assigned_by?: string | null;
+        };
+        Update: {
+          listing_id?: string;
+          profile_id?: string;
+          assigned_by?: string | null;
+        };
+        Relationships: [];
+      };
+      activity_logs: {
+        Row: {
+          id: string;
+          created_at: string;
+          actor_id: string | null;
+          action: ActivityAction;
+          entity_type: ActivityEntityType;
+          entity_id: string | null;
+          metadata: Record<string, unknown>;
+          note: string | null;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          actor_id?: string | null;
+          action: ActivityAction;
+          entity_type: ActivityEntityType;
+          entity_id?: string | null;
+          metadata?: Record<string, unknown>;
+          note?: string | null;
+        };
+        Update: never;
+        Relationships: [];
+      };
 };
   };
 }
@@ -287,3 +342,7 @@ export type ContactInsert = Database['public']['Tables']['contacts']['Insert'];
 export type ListingInsert = Database['public']['Tables']['listings']['Insert'];
 export type ContactUpdate = Database['public']['Tables']['contacts']['Update'];
 export type ListingUpdate = Database['public']['Tables']['listings']['Update'];
+export type ListingAssignment = Database['public']['Tables']['listing_assignments']['Row'];
+export type ListingAssignmentInsert = Database['public']['Tables']['listing_assignments']['Insert'];
+export type ActivityLog = Database['public']['Tables']['activity_logs']['Row'];
+export type ActivityLogInsert = Database['public']['Tables']['activity_logs']['Insert'];

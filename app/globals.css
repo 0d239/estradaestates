@@ -64,6 +64,19 @@
   animation: glow-pulse 3s ease-in-out infinite;
 }
 
+@keyframes avatar-glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 4px rgba(251, 191, 36, 0.3), 0 0 8px rgba(251, 191, 36, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 10px rgba(251, 191, 36, 0.6), 0 0 20px rgba(251, 191, 36, 0.2);
+  }
+}
+
+.avatar-glow {
+  animation: avatar-glow-pulse 3s ease-in-out infinite;
+}
+
 .calligraphy-glow {
   filter: brightness(1.3) sepia(1) saturate(3) hue-rotate(10deg) drop-shadow(0 0 6px rgba(251, 191, 36, 0.5)) drop-shadow(0 0 16px rgba(251, 191, 36, 0.25));
 }
@@ -98,7 +111,11 @@
 
 /* Scroll-snap: non-linear scroll rhythm */
 .snap-scroll {
-  scroll-snap-type: y proximity;
+  /* Disable snap on mobile — proximity snapping fights touch scrolling
+     during animated metric counting and general swipe gestures. */
+  @media (min-width: 768px) {
+    scroll-snap-type: y proximity;
+  }
 }
 
 .snap-section {

@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Search, Trash2, UserCheck, Building2, ArrowRightLeft, Eye, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { logActivity } from '@/lib/activity-log'
+import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/Button'
 import type { Contact } from '@/lib/database.types'
 import { INTEREST_BUYING, INTEREST_SELLING, INTEREST_DESIGN } from '@/lib/schemas/lead'
@@ -26,6 +28,7 @@ const flagColors: Record<number, string> = {
 
 export default function LeadsPage() {
   const queryClient = useQueryClient()
+  const { user } = useAuth()
   const [search, setSearch] = useState('')
   const [interestFilter, setInterestFilter] = useState<number>(0)
   const [viewingLead, setViewingLead] = useState<Contact | null>(null)
@@ -49,8 +52,17 @@ export default function LeadsPage() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
+      const lead = leads?.find((l) => l.id === id)
       const { error } = await supabase.from('contacts').delete().eq('id', id)
       if (error) throw error
+
+      await logActivity({
+        actorId: user?.id ?? null,
+        action: 'lead_deleted',
+        entityType: 'lead',
+        entityId: id,
+        metadata: { name: lead?.name, interest_flags: lead?.interest_flags },
+      })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['leads'] })
@@ -313,11 +325,14 @@ function DetailRow({ label, value }: { label: string; value: string | null | und
 
 function ConvertLeadModal({ lead, onClose }: { lead: Contact; onClose: () => void }) {
   const queryClient = useQueryClient()
+  const { user } = useAuth()
   const [convertTo, setConvertTo] = useState<'contact' | 'listing' | 'both'>('contact')
   const [error, setError] = useState<string | null>(null)
 
   const mutation = useMutation({
     mutationFn: async () => {
+      const actorId = user?.id ?? null
+
       if (convertTo === 'contact' || convertTo === 'both') {
         const { error } = await supabase
           .from('contacts')
@@ -328,7 +343,7 @@ function ConvertLeadModal({ lead, onClose }: { lead: Contact; onClose: () => voi
 
       if (convertTo === 'listing' || convertTo === 'both') {
         const zip = lead.property_zipcode || (lead.preferred_zipcodes?.length ? lead.preferred_zipcodes[0] : null)
-        const { error } = await supabase.from('listings').insert({
+        const { data: inserted, error } = await supabase.from('listings').insert({
           address: 'TBD',
           status: 'off_market' as const,
           state: 'CA',
@@ -337,8 +352,16 @@ function ConvertLeadModal({ lead, onClose }: { lead: Contact; onClose: () => voi
           bedrooms: lead.bedrooms_min,
           bathrooms: lead.bathrooms_min,
           description: `Listing created from lead: ${lead.name}${lead.notes ? `\n\n${lead.notes}` : ''}`,
-        })
+        }).select('id').single()
         if (error) throw error
+
+        await logActivity({
+          actorId,
+          action: 'listing_created',
+          entityType: 'listing',
+          entityId: inserted.id,
+          metadata: { source: 'lead_conversion', lead_name: lead.name },
+        })
 
         if (convertTo === 'listing') {
           const { error: deleteError } = await supabase
@@ -348,6 +371,14 @@ function ConvertLeadModal({ lead, onClose }: { lead: Contact; onClose: () => voi
           if (deleteError) throw deleteError
         }
       }
+
+      await logActivity({
+        actorId,
+        action: 'lead_converted',
+        entityType: 'lead',
+        entityId: lead.id,
+        metadata: { name: lead.name, convert_to: convertTo },
+      })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['leads'] })

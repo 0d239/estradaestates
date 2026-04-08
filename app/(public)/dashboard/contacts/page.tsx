@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Plus, Search, Trash2, Pencil, ChevronLeft, ChevronRight } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { logActivity } from '@/lib/activity-log'
+import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/Button'
 import { ContactForm } from '@/components/dashboard/ContactForm'
 import type { Contact, ContactType } from '@/lib/database.types'
@@ -12,6 +14,7 @@ const PAGE_SIZE = 15
 
 export default function ContactsPage() {
   const queryClient = useQueryClient()
+  const { user } = useAuth()
   const [typeFilter, setTypeFilter] = useState<Exclude<ContactType, 'lead'> | ''>('')
   const [search, setSearch] = useState('')
   const [showForm, setShowForm] = useState(false)
@@ -39,8 +42,17 @@ export default function ContactsPage() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
+      const contact = contacts?.find((c) => c.id === id)
       const { error } = await supabase.from('contacts').delete().eq('id', id)
       if (error) throw error
+
+      await logActivity({
+        actorId: user?.id ?? null,
+        action: 'contact_deleted',
+        entityType: 'contact',
+        entityId: id,
+        metadata: { name: contact?.name, type: contact?.type },
+      })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contacts'] })

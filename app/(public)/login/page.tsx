@@ -44,7 +44,6 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         {/* Mobile: minimal, no card chrome */}
         <div className="md:hidden text-center mb-8">
-          <img src="/hills.svg" alt="Estrada Estates" className="h-12 w-auto mx-auto mb-4 logo-glow" />
           <h1 className="text-xl font-semibold text-white">Admin Login</h1>
           <p className="text-sm text-neutral-400 mt-1">Access the dashboard</p>
         </div>

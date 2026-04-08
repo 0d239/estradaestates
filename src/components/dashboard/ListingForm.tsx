@@ -5,6 +5,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X } from 'lucide-react';
 import { listingSchema, type ListingFormData } from '@/lib/schemas/listing';
 import { supabase } from '@/lib/supabase';
+import { logActivity } from '@/lib/activity-log';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/Button';
 import type { Listing } from '@/lib/database.types';
 
@@ -15,6 +17,7 @@ interface ListingFormProps {
 
 export function ListingForm({ listing, onClose }: ListingFormProps) {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const isEditing = !!listing;
 
   const [formData, setFormData] = useState<ListingFormData>({
@@ -39,15 +42,48 @@ export function ListingForm({ listing, onClose }: ListingFormProps) {
 
   const mutation = useMutation({
     mutationFn: async (data: ListingFormData) => {
+      const actorId = user?.id ?? null;
+
       if (isEditing) {
         const { error } = await supabase
           .from('listings')
           .update(data)
           .eq('id', listing!.id);
         if (error) throw error;
+
+        // Log status change separately if it changed
+        if (listing!.status !== data.status) {
+          await logActivity({
+            actorId,
+            action: 'listing_status_changed',
+            entityType: 'listing',
+            entityId: listing!.id,
+            metadata: { address: data.address, old_status: listing!.status, new_status: data.status },
+          });
+        }
+
+        await logActivity({
+          actorId,
+          action: 'listing_updated',
+          entityType: 'listing',
+          entityId: listing!.id,
+          metadata: { address: data.address, status: data.status },
+        });
       } else {
-        const { error } = await supabase.from('listings').insert(data);
+        const { data: inserted, error } = await supabase
+          .from('listings')
+          .insert(data)
+          .select('id')
+          .single();
         if (error) throw error;
+
+        await logActivity({
+          actorId,
+          action: 'listing_created',
+          entityType: 'listing',
+          entityId: inserted.id,
+          metadata: { address: data.address, status: data.status, source: 'manual' },
+        });
       }
     },
     onSuccess: () => {
