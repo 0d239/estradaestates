@@ -88,7 +88,6 @@ export function Header() {
             <NavItem href="/services">Services</NavItem>
             <NavItem href="/listings">Listings</NavItem>
             <NavItem href="/contact">Contact</NavItem>
-            {session && <NavItem href="/dashboard">Dash</NavItem>}
           </nav>
 
           <div className="flex items-center gap-4">
@@ -204,7 +203,6 @@ export function Header() {
             <MobileNavItem href="/services">Services</MobileNavItem>
             <MobileNavItem href="/listings">Listings</MobileNavItem>
             <MobileNavItem href="/contact">Contact</MobileNavItem>
-            {session && <MobileNavItem href="/dashboard">Dashboard</MobileNavItem>}
           </nav>
           <div className="border-t border-neutral-700 px-4 py-3">
             <a

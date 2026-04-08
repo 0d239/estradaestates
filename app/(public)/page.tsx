@@ -64,10 +64,8 @@ function AnimatedMetric({ value, label }: { value: string; label: string }) {
 export default function TeamPage() {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Enable scroll-snap + observe all reveal elements
+  // Observe all reveal elements
   useEffect(() => {
-    document.documentElement.classList.add('snap-scroll');
-
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -87,16 +85,13 @@ export default function TeamPage() {
       });
     }
 
-    return () => {
-      document.documentElement.classList.remove('snap-scroll');
-      observer.disconnect();
-    };
+    return () => observer.disconnect();
   }, []);
 
   return (
     <div ref={containerRef} className="py-12">
       {/* Metric Story Hero */}
-      <section className="container-narrow text-center mb-24 snap-section reveal-fade">
+      <section className="container-narrow text-center mb-24 reveal-fade">
         <Badge className="mb-4">Hollister, CA Real Estate</Badge>
         <h1 className="text-4xl font-bold text-white mb-4">
           Welcome to {companyInfo.name}
@@ -114,7 +109,7 @@ export default function TeamPage() {
       {/* Team by Division */}
       <DivisionTabs>
         {(active) => (
-          <section className="container-narrow mb-16 space-y-8 snap-section">
+          <section className="container-narrow mb-16 space-y-8 ">
             {team.filter((m) => m.division === active).map((member, i) => (
               <Card key={member.id} className={`overflow-hidden reveal stagger-${i + 1}`}>
                 <div className="grid md:grid-cols-3 gap-0">
@@ -180,7 +175,7 @@ export default function TeamPage() {
       </DivisionTabs>
 
       {/* Office Info */}
-      <section className="container-narrow snap-section reveal-scale">
+      <section className="container-narrow  reveal-scale">
         <Card>
           <CardContent className="p-6 sm:p-8 overflow-hidden">
             <div className="grid md:grid-cols-2 gap-8">

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { ChevronLeft, ChevronRight, Send, ShieldAlert } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Send } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { logActivity } from '@/lib/activity-log'
 import { useAuth } from '@/contexts/AuthContext'
@@ -54,15 +54,6 @@ export default function ActivityPage() {
   const [page, setPage] = useState(0)
   const [noteText, setNoteText] = useState('')
 
-  // Admin only
-  if (profile && profile.role !== 'admin') {
-    return (
-      <div className="text-center py-16">
-        <ShieldAlert className="w-8 h-8 text-neutral-600 mx-auto mb-3" />
-        <p className="text-neutral-400">Activity logs are restricted to admin accounts.</p>
-      </div>
-    )
-  }
 
   const { data: profiles } = useQuery({
     queryKey: ['profiles'],

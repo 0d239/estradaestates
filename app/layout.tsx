@@ -3,7 +3,7 @@ import { Providers } from '@/components/providers'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Estrada Estates Realty Group',
+  title: 'Estrada Estates',
   description:
     'Full-service real estate brokerage in Hollister, CA serving San Benito County. Buying, selling, and property management services.',
 }
@@ -14,7 +14,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" data-scroll-behavior="smooth">
+    <html lang="en">
       <body>
         <Providers>{children}</Providers>
       </body>
