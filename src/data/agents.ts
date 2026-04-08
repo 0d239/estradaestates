@@ -9,6 +9,7 @@ export interface TeamMember {
   phone: string;
   email: string;
   image: string;
+  signature?: string;
   bio: string;
   specialties: string[];
   badges?: string[];
@@ -27,6 +28,7 @@ export const team: TeamMember[] = [
     phone: '(408) 804-1511',
     email: 'EstradaSold@MyHillTopRealty.com',
     image: 'https://global.acceleragent.com/usr/13705421761/1161817043.jpg',
+    signature: '/enrique.png',
     bio: 'For over 30 years, he’s been transforming lives through real estate, helping thousands achieve homeownership, often when others wouldn’t. Known for his honesty, resilience, and unwavering follow-through, he’s the guy who always picks up the phone. With deep roots in the community, fluency in Spanish, and a heart for helping those facing tough odds, he’s not just a top performer—he’s the trusted ally you want on your side.',
     specialties: [
       'Residential Sales',
@@ -45,6 +47,7 @@ export const team: TeamMember[] = [
     phone: '(831) 524-7076',
     email: 'soldbysophiaestrada@gmail.com',
     image: 'https://placehold.co/400x400/1a1a1a/666666?text=Sophia+Estrada&font=Inter',
+    signature: '/sophia.png',
     bio: 'Sophia Estrada represents the next generation of Hilltop Realty and Estrada Estates, bringing a fresh, client-first approach backed by experience working with top-performing real estate teams. She is known for her strong communication, attention to detail, and ability to create a personalized experience tailored to each client\'s unique needs.\n\nSophia is passionate about helping clients navigate one of life\'s biggest milestones with confidence and ease. Whether working with first-time buyers or those going through a transition, she is committed to making the process feel supported, seamless, and rewarding every step of the way.',
     specialties: [
       'Digital Marketing',
@@ -81,6 +84,8 @@ export const metrics = [
 
 export const companyInfo = {
   name: 'Estrada Estates Realty Group',
+  legalName: 'Hilltop Realty',
+  legalNote: 'Estrada Estates Realty Group is a d/b/a of Hilltop Realty, established and owned by Enrique "Henry" Estrada.',
   tagline: 'Your Trusted Partner in San Benito County Real Estate',
   address: '330 Tres Pinos Rd, Suite F8-3',
   city: 'Hollister',

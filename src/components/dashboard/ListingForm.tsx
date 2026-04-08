@@ -105,7 +105,7 @@ export function ListingForm({ listing, onClose }: ListingFormProps) {
           />
 
           {/* City, State, Zip */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <FormField
               label="City"
               value={formData.city ?? ''}
@@ -124,7 +124,7 @@ export function ListingForm({ listing, onClose }: ListingFormProps) {
           </div>
 
           {/* Status & Price */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-neutral-300 mb-1">Status</label>
               <select
@@ -147,7 +147,7 @@ export function ListingForm({ listing, onClose }: ListingFormProps) {
           </div>
 
           {/* Property details */}
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <FormField
               label="Beds"
               value={formData.bedrooms?.toString() ?? ''}
@@ -175,7 +175,7 @@ export function ListingForm({ listing, onClose }: ListingFormProps) {
           </div>
 
           {/* Lot size & MLS */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormField
               label="Lot Size"
               value={formData.lot_size ?? ''}

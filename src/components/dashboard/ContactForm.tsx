@@ -121,7 +121,7 @@ export function ContactForm({ contact, onClose }: ContactFormProps) {
           />
 
           {/* Phone & Email */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormField
               label="Phone"
               value={formData.phone ?? ''}
@@ -149,7 +149,7 @@ export function ContactForm({ contact, onClose }: ContactFormProps) {
           />
 
           {/* Company & Birthday */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormField
               label="Company"
               value={formData.company ?? ''}
@@ -172,7 +172,7 @@ export function ContactForm({ contact, onClose }: ContactFormProps) {
                 </h3>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <FormField
                   label="Budget ($)"
                   value={formData.budget?.toString() ?? ''}
@@ -193,7 +193,7 @@ export function ContactForm({ contact, onClose }: ContactFormProps) {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
                   label="Preferred Zipcodes (comma-separated)"
                   value={formData.preferred_zipcodes?.join(', ') ?? ''}

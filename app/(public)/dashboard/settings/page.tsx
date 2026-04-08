@@ -47,16 +47,16 @@ export default function SettingsPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white">Settings</h1>
+        <h1 className="text-2xl font-semibold text-white">Settings</h1>
         <p className="text-neutral-400 mt-1">
           Manage your account{profile ? `, ${profile.name.split(' ')[0]}` : ''}.
         </p>
       </div>
 
       <div className="max-w-md">
-        <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-6">
+        <div className="bg-neutral-800/40 border border-neutral-700/50 rounded-2xl p-7">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-lg bg-primary-500/20 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-primary-500/10 flex items-center justify-center">
               <Lock className="w-5 h-5 text-primary-400" />
             </div>
             <div>
@@ -65,7 +65,7 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          <form onSubmit={handleChangePassword} className="space-y-4">
+          <form onSubmit={handleChangePassword} className="space-y-5">
             <div>
               <label htmlFor="new-password" className="block text-sm font-medium text-neutral-300 mb-1.5">
                 New Password
@@ -77,7 +77,7 @@ export default function SettingsPage() {
                 onChange={(e) => setNewPassword(e.target.value)}
                 required
                 minLength={8}
-                className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                className="w-full rounded-xl border border-neutral-700/50 bg-neutral-800/50 px-4 py-3 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
                 placeholder="Min. 8 characters"
               />
             </div>
@@ -93,7 +93,7 @@ export default function SettingsPage() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 minLength={8}
-                className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                className="w-full rounded-xl border border-neutral-700/50 bg-neutral-800/50 px-4 py-3 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
                 placeholder="Re-enter new password"
               />
             </div>
@@ -107,7 +107,7 @@ export default function SettingsPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-lg bg-primary-500 hover:bg-primary-400 disabled:opacity-50 disabled:cursor-not-allowed text-neutral-900 font-medium py-2 text-sm transition-colors"
+              className="w-full rounded-xl bg-primary-500 hover:bg-primary-400 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-3 text-sm transition-colors"
             >
               {loading ? 'Updating...' : 'Update Password'}
             </button>

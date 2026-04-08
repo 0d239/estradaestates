@@ -30,7 +30,7 @@ export function DivisionTabs({
               className={cn(
                 'relative flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer',
                 active === key
-                  ? 'bg-primary-500 text-neutral-900 shadow-sm shadow-primary-500/25'
+                  ? 'bg-primary-500 text-white shadow-sm shadow-primary-500/25'
                   : 'text-neutral-400 hover:text-neutral-200'
               )}
             >

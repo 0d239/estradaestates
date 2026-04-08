@@ -82,7 +82,7 @@ export default function CalendarPage() {
             </a>{' '}
             under &ldquo;Integrate calendar.&rdquo; For your primary calendar, this is usually your Gmail address.
           </p>
-          <form onSubmit={handleConnect} className="flex items-center gap-3 max-w-lg mx-auto mt-4">
+          <form onSubmit={handleConnect} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 max-w-lg mx-auto mt-4">
             <input
               type="text"
               value={calendarId}
@@ -112,8 +112,7 @@ export default function CalendarPage() {
           <div className="rounded-xl border border-neutral-800 overflow-hidden bg-neutral-900/50">
             <iframe
               src={embedUrl!}
-              className="w-full border-0"
-              style={{ height: 'calc(100vh - 280px)', minHeight: '500px' }}
+              className="w-full border-0 h-[60vh] sm:h-[calc(100vh-280px)] min-h-[400px] sm:min-h-[500px]"
               title="Google Calendar"
               sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
             />
