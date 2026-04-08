@@ -2,6 +2,7 @@
 
 import { Card, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
+import { DivisionTabs } from '@/components/ui/DivisionTabs';
 import { realtyServices, designServices } from '@/data/services';
 import type { RealtyService, DesignServiceCategory } from '@/data/services';
 
@@ -80,31 +81,35 @@ function DesignCategoryCard({ category }: { category: DesignServiceCategory }) {
 export default function ServicesPage() {
   return (
     <div className="py-12">
-      {/* Real Estate */}
-      <ServiceSection
-        badge="Real Estate"
-        title="Buy, Sell & Finance"
-        subtitle="From first showing to closing day — expert guidance at every step."
-      >
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {realtyServices.map((service) => (
-            <RealtyServiceCard key={service.title} service={service} />
-          ))}
-        </div>
-      </ServiceSection>
-
-      {/* Design & Property Value Strategy */}
-      <ServiceSection
-        badge="Design"
-        title="Design & Staging"
-        subtitle="Award-winning interior design that maximizes property value — led by Laura Velasco."
-      >
-        <div className="grid sm:grid-cols-2 gap-6">
-          {designServices.map((category) => (
-            <DesignCategoryCard key={category.title} category={category} />
-          ))}
-        </div>
-      </ServiceSection>
+      <DivisionTabs>
+        {(active) =>
+          active === 'brokerage' ? (
+            <ServiceSection
+              badge="Real Estate"
+              title="Buy, Sell & Finance"
+              subtitle="From first showing to closing day — expert guidance at every step."
+            >
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {realtyServices.map((service) => (
+                  <RealtyServiceCard key={service.title} service={service} />
+                ))}
+              </div>
+            </ServiceSection>
+          ) : (
+            <ServiceSection
+              badge="Design"
+              title="Design & Staging"
+              subtitle="Award-winning interior design that maximizes property value — led by Laura Velasco."
+            >
+              <div className="grid sm:grid-cols-2 gap-6">
+                {designServices.map((category) => (
+                  <DesignCategoryCard key={category.title} category={category} />
+                ))}
+              </div>
+            </ServiceSection>
+          )
+        }
+      </DivisionTabs>
     </div>
   );
 }

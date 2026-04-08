@@ -1,7 +1,10 @@
+export type Division = 'brokerage' | 'design';
+
 export interface TeamMember {
   id: string;
   name: string;
   title: string;
+  division: Division;
   license?: string;
   phone: string;
   email: string;
@@ -19,6 +22,7 @@ export const team: TeamMember[] = [
     id: 'henry-estrada',
     name: 'Enrique "Henry" Estrada',
     title: 'Owner/Broker, GRI',
+    division: 'brokerage',
     license: 'DRE# 01200315',
     phone: '(408) 804-1511',
     email: 'EstradaSold@MyHillTopRealty.com',
@@ -36,6 +40,7 @@ export const team: TeamMember[] = [
     id: 'sophia-estrada',
     name: 'Sophia Estrada',
     title: 'Realtor',
+    division: 'brokerage',
     license: 'DRE# 02260287',
     phone: '(831) 524-7076',
     email: 'soldbysophiaestrada@gmail.com',
@@ -53,6 +58,7 @@ export const team: TeamMember[] = [
     id: 'laura-velasco',
     name: 'Laura Velasco',
     title: 'Design + Property Value Strategist',
+    division: 'design',
     phone: '',
     email: 'laura@levelupid.com',
     image: 'https://levelupid.com/wp-content/uploads/2021/03/1-LauraVelasco.jpg',

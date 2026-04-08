@@ -5,6 +5,7 @@ import { Phone, Mail, Award, MapPin } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
+import { DivisionTabs } from '@/components/ui/DivisionTabs';
 import { team, metrics, companyInfo } from '@/data/agents';
 
 function parseMetricValue(value: string) {
@@ -79,69 +80,73 @@ export default function TeamPage() {
         </div>
       </section>
 
-      {/* Team Cards */}
-      <section className="container-narrow mb-16 space-y-8">
-        {team.map((member) => (
-          <Card key={member.id} className="overflow-hidden">
-            <div className="grid md:grid-cols-3 gap-0">
-              <div className="aspect-square md:aspect-auto">
-                <img
-                  src={member.image}
-                  alt={member.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="md:col-span-2">
-                <CardContent className="p-8">
-                  <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
-                    <div>
-                      <h2 className="text-2xl font-bold text-white">{member.name}</h2>
-                      <p className="text-primary-400 font-medium">{member.title}</p>
-                      {member.license && (
-                        <p className="text-sm text-neutral-400 mt-1">{member.license}</p>
-                      )}
-                    </div>
-                    <div className="flex gap-2">
-                      {member.phone && (
-                        <a href={`tel:${member.phone}`}>
-                          <Button variant="primary" size="sm">
-                            <Phone className="w-4 h-4 mr-2" />
-                            Call
-                          </Button>
-                        </a>
-                      )}
-                      {member.email && (
-                        <a href={`mailto:${member.email}`}>
-                          <Button variant="outline" size="sm">
-                            <Mail className="w-4 h-4 mr-2" />
-                            Email
-                          </Button>
-                        </a>
-                      )}
-                    </div>
+      {/* Team by Division */}
+      <DivisionTabs>
+        {(active) => (
+          <section className="container-narrow mb-16 space-y-8">
+            {team.filter((m) => m.division === active).map((member) => (
+              <Card key={member.id} className="overflow-hidden">
+                <div className="grid md:grid-cols-3 gap-0">
+                  <div className="aspect-square md:aspect-auto">
+                    <img
+                      src={member.image}
+                      alt={member.name}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
+                  <div className="md:col-span-2">
+                    <CardContent className="p-8">
+                      <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
+                        <div>
+                          <h2 className="text-2xl font-bold text-white">{member.name}</h2>
+                          <p className="text-primary-400 font-medium">{member.title}</p>
+                          {member.license && (
+                            <p className="text-sm text-neutral-400 mt-1">{member.license}</p>
+                          )}
+                        </div>
+                        <div className="flex gap-2">
+                          {member.phone && (
+                            <a href={`tel:${member.phone}`}>
+                              <Button variant="primary" size="sm">
+                                <Phone className="w-4 h-4 mr-2" />
+                                Call
+                              </Button>
+                            </a>
+                          )}
+                          {member.email && (
+                            <a href={`mailto:${member.email}`}>
+                              <Button variant="outline" size="sm">
+                                <Mail className="w-4 h-4 mr-2" />
+                                Email
+                              </Button>
+                            </a>
+                          )}
+                        </div>
+                      </div>
 
-                  <p className="text-neutral-400 mb-6 leading-relaxed">{member.bio}</p>
+                      <p className="text-neutral-400 mb-6 leading-relaxed">{member.bio}</p>
 
-                  <div>
-                    <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
-                      <Award className="w-4 h-4 text-primary-400" />
-                      Specialties
-                    </h3>
-                    <div className="flex flex-wrap gap-2">
-                      {member.specialties.map((specialty) => (
-                        <Badge key={specialty} variant="default">
-                          {specialty}
-                        </Badge>
-                      ))}
-                    </div>
+                      <div>
+                        <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+                          <Award className="w-4 h-4 text-primary-400" />
+                          Specialties
+                        </h3>
+                        <div className="flex flex-wrap gap-2">
+                          {member.specialties.map((specialty) => (
+                            <Badge key={specialty} variant="default">
+                              {specialty}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    </CardContent>
                   </div>
-                </CardContent>
-              </div>
-            </div>
-          </Card>
-        ))}
-      </section>
+                </div>
+              </Card>
+            ))}
+          </section>
+        )}
+      </DivisionTabs>
 
       {/* Office Info */}
       <section className="container-narrow">
