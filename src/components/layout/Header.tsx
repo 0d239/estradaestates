@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Phone, LogIn, LogOut, Menu, X, LayoutDashboard, User } from 'lucide-react'
+import { Phone, LogIn, LogOut, Menu, X, LayoutDashboard, User, Home, Wrench, Building2, MessageCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { companyInfo } from '@/data/agents'
 import { useAuth } from '@/contexts/AuthContext'
@@ -13,6 +13,7 @@ export function Header() {
   const router = useRouter()
   const pathname = usePathname()
   const isDashboardHome = pathname === '/dashboard'
+  const logoHref = session ? (pathname.startsWith('/dashboard') ? '/' : '/dashboard') : '/'
   const [mobileOpen, setMobileOpen] = useState(false)
   const [avatarOpen, setAvatarOpen] = useState(false)
   const avatarRef = useRef<HTMLDivElement>(null)
@@ -64,21 +65,31 @@ export function Header() {
       <div className="container-wide">
         <div className="relative flex items-center justify-between h-16">
           {/* Mobile hamburger (left side) */}
-          <button
-            onClick={() => setMobileOpen((prev) => !prev)}
-            className="md:hidden inline-flex items-center justify-center rounded-lg text-neutral-300 hover:text-white hover:bg-neutral-700 transition-colors w-9 h-9"
-            aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
-          >
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+          <div className="md:hidden relative">
+            <button
+              onClick={() => setMobileOpen((prev) => !prev)}
+              className="inline-flex items-center justify-center rounded-lg text-neutral-300 hover:text-white hover:bg-neutral-700 transition-colors w-9 h-9"
+              aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+            >
+              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+            {mobileOpen && (
+              <div className="absolute left-0 top-full mt-2 flex flex-col bg-neutral-800 border border-neutral-700 rounded-xl shadow-lg overflow-hidden z-50">
+                <MobileIconNav href="/" icon={Home} label="Team" />
+                <MobileIconNav href="/services" icon={Wrench} label="Services" />
+                <MobileIconNav href="/listings" icon={Building2} label="Listings" />
+                <MobileIconNav href="/contact" icon={Phone} label="Contact" />
+              </div>
+            )}
+          </div>
 
           {/* Desktop: logo on the left */}
-          <Link href="/" className="hidden md:flex items-center gap-2.5">
+          <Link href={logoHref} className="hidden md:flex items-center gap-2.5">
             <img src="/hills.svg" alt="Estrada Estates" className="h-9 w-auto logo-glow" />
           </Link>
 
           {/* Mobile: centered logo */}
-          <Link href="/" className="md:hidden absolute left-1/2 -translate-x-1/2">
+          <Link href={logoHref} className="md:hidden absolute left-1/2 -translate-x-1/2">
             <img src="/hills.svg" alt="Estrada Estates" className="h-9 w-auto logo-glow" />
           </Link>
 
@@ -125,7 +136,7 @@ export function Header() {
                       )}
                     </button>
                     {avatarOpen && (
-                      <div className="absolute right-0 top-full mt-2 flex bg-neutral-800 border border-neutral-700 rounded-xl shadow-lg overflow-hidden z-50">
+                      <div className="absolute right-0 top-full mt-2 flex flex-col bg-neutral-800 border border-neutral-700 rounded-xl shadow-lg overflow-hidden z-50">
                         <Link
                           href="/dashboard"
                           className="inline-flex items-center justify-center w-11 h-11 text-primary-400 hover:bg-neutral-700/50 transition-colors"
@@ -135,7 +146,7 @@ export function Header() {
                         </Link>
                         <button
                           onClick={handleSignOut}
-                          className="inline-flex items-center justify-center w-11 h-11 text-neutral-300 hover:bg-neutral-700/50 transition-colors border-l border-neutral-700"
+                          className="inline-flex items-center justify-center w-11 h-11 text-neutral-300 hover:bg-neutral-700/50 transition-colors border-t border-neutral-700"
                           aria-label="Logout"
                         >
                           <LogOut className="w-5 h-5" />
@@ -190,31 +201,6 @@ export function Header() {
         </div>
       </div>
 
-      {/* Mobile dropdown bands */}
-      <div
-        className={cn(
-          'md:hidden overflow-hidden transition-[grid-template-rows] duration-300 ease-in-out grid',
-          mobileOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
-        )}
-      >
-        <div className="overflow-hidden">
-          <nav className="border-t border-neutral-700">
-            <MobileNavItem href="/">Team</MobileNavItem>
-            <MobileNavItem href="/services">Services</MobileNavItem>
-            <MobileNavItem href="/listings">Listings</MobileNavItem>
-            <MobileNavItem href="/contact">Contact</MobileNavItem>
-          </nav>
-          <div className="border-t border-neutral-700 px-4 py-3">
-            <a
-              href={`tel:${companyInfo.phone}`}
-              className="flex items-center justify-center gap-2 text-sm font-medium text-primary-400"
-            >
-              <Phone className="w-4 h-4" />
-              <span>{companyInfo.phone}</span>
-            </a>
-          </div>
-        </div>
-      </div>
     </header>
 
     </>
@@ -240,7 +226,7 @@ function NavItem({ href, children }: { href: string; children: React.ReactNode }
   )
 }
 
-function MobileNavItem({ href, children }: { href: string; children: React.ReactNode }) {
+function MobileIconNav({ href, icon: Icon, label }: { href: string; icon: React.ElementType; label: string }) {
   const pathname = usePathname()
   const isActive = href === '/' ? pathname === '/' : pathname.startsWith(href)
 
@@ -248,13 +234,14 @@ function MobileNavItem({ href, children }: { href: string; children: React.React
     <Link
       href={href}
       className={cn(
-        'block w-full px-6 py-3.5 text-sm font-medium text-center border-b border-neutral-700/50 transition-colors',
+        'inline-flex items-center justify-center w-11 h-11 transition-colors',
         isActive
-          ? 'bg-primary-900/30 text-primary-300'
-          : 'text-neutral-300 hover:bg-neutral-700/50 hover:text-white'
+          ? 'text-primary-400 bg-primary-900/30'
+          : 'text-neutral-400 hover:text-white hover:bg-neutral-700/50',
       )}
+      aria-label={label}
     >
-      {children}
+      <Icon className="w-5 h-5" />
     </Link>
   )
 }

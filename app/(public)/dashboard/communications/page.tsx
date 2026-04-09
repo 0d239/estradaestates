@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { MessageSquare, Plus, Clock, Users } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/Button'
+import { DashboardPageHeader } from '../layout'
 import { ComposeMessage } from '@/components/dashboard/ComposeMessage'
 import type { Communication } from '@/lib/database.types'
 
@@ -25,12 +26,15 @@ export default function CommunicationsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="hidden md:block text-2xl font-bold text-white">Messages</h1>
-        <Button variant="primary" onClick={() => setShowCompose(true)} className="ml-auto">
-          <Plus className="w-4 h-4 mr-2" /> Compose
-        </Button>
-      </div>
+      <DashboardPageHeader
+        icon={MessageSquare}
+        label="Messages"
+        action={
+          <Button variant="primary" onClick={() => setShowCompose(true)}>
+            <Plus className="w-4 h-4 mr-2" /> Compose
+          </Button>
+        }
+      />
 
       {showCompose && <ComposeMessage onClose={() => setShowCompose(false)} />}
 

@@ -2,11 +2,12 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Search, Trash2, Pencil, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Plus, Search, Trash2, Pencil, ChevronLeft, ChevronRight, Users } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { logActivity } from '@/lib/activity-log'
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/Button'
+import { DashboardPageHeader } from '../layout'
 import { ContactForm } from '@/components/dashboard/ContactForm'
 import { DeleteConfirmModal } from '@/components/dashboard/DeleteConfirmModal'
 import type { Contact, ContactType } from '@/lib/database.types'
@@ -90,12 +91,15 @@ export default function ContactsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="hidden md:block text-2xl font-bold text-white">Contacts</h1>
-        <Button variant="primary" size="sm" onClick={() => setShowForm(true)} className="ml-auto">
-          <Plus className="w-4 h-4 mr-1" /> Add
-        </Button>
-      </div>
+      <DashboardPageHeader
+        icon={Users}
+        label="Contacts"
+        action={
+          <Button variant="primary" size="sm" onClick={() => setShowForm(true)}>
+            <Plus className="w-4 h-4 mr-1" /> Add
+          </Button>
+        }
+      />
 
       {/* Search */}
       <div className="relative mb-3">

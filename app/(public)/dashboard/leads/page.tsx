@@ -2,11 +2,12 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Search, Trash2, UserCheck, Building2, ArrowRightLeft, Eye, X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Search, Trash2, UserCheck, Building2, ArrowRightLeft, Eye, X, ChevronLeft, ChevronRight, UserPlus } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { logActivity } from '@/lib/activity-log'
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/Button'
+import { DashboardPageHeader } from '../layout'
 import type { Contact } from '@/lib/database.types'
 import { INTEREST_BUYING, INTEREST_SELLING, INTEREST_DESIGN } from '@/lib/schemas/lead'
 
@@ -87,12 +88,11 @@ export default function LeadsPage() {
 
   return (
     <div>
-      <div className="hidden md:block mb-4">
-        <h1 className="text-2xl font-bold text-white">Leads</h1>
-        <p className="text-sm text-neutral-500 mt-1">
-          Incoming leads from the contact form.
-        </p>
-      </div>
+      <DashboardPageHeader
+        icon={UserPlus}
+        label="Leads"
+        description="Incoming leads from the contact form."
+      />
 
       {/* Search */}
       <div className="relative mb-3">

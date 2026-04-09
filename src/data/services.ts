@@ -18,7 +18,6 @@ export interface RealtyService {
 export interface DesignServiceCategory {
   title: string;
   description: string;
-  image: string;
   services: { name: string; description: string }[];
 }
 
@@ -95,7 +94,7 @@ export const designServices: DesignServiceCategory[] = [
   {
     title: 'Pre-Purchase',
     description: 'Strategic design insight before you close.',
-    image: 'https://placehold.co/600x400/1a1a1a/666666?text=Pre-Purchase&font=Inter',
+
     services: [
       {
         name: 'Pre-Purchase Design Assessment',
@@ -118,7 +117,7 @@ export const designServices: DesignServiceCategory[] = [
   {
     title: 'New Construction',
     description: 'Full-service design from concept to completion.',
-    image: 'https://placehold.co/600x400/1a1a1a/666666?text=New+Construction&font=Inter',
+
     services: [
       {
         name: 'Concept to Completion Design Leadership',
@@ -145,7 +144,7 @@ export const designServices: DesignServiceCategory[] = [
   {
     title: 'Rehab / Value-Add Renovations',
     description: 'Upgrades that drive the highest ROI.',
-    image: 'https://placehold.co/600x400/1a1a1a/666666?text=Rehab+%2F+Value-Add&font=Inter',
+
     services: [
       {
         name: 'Strategic Renovation Planning',
@@ -172,7 +171,7 @@ export const designServices: DesignServiceCategory[] = [
   {
     title: 'Selling / Lease-Up',
     description: 'Design that sells and leases faster.',
-    image: 'https://placehold.co/600x400/1a1a1a/666666?text=Selling+%2F+Lease-Up&font=Inter',
+
     services: [
       {
         name: 'Model Units & Amenity Styling',

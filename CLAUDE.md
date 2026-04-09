@@ -35,10 +35,15 @@ Estrada Estates Realty Group — a Next.js App Router + Supabase backend for a r
 - `/login` — Team login
 
 **Protected dashboard routes** (`app/(public)/dashboard/` with tab bar layout, protected by middleware):
-- `/dashboard` — Dashboard overview
-- `/dashboard/contacts` — Contact management (clients, leads, partners)
-- `/dashboard/listings` — Listing management (CRUD)
-- `/dashboard/communications` — Mass text/email compose and history
+- `/dashboard` — Dashboard overview with quick stats and navigation
+- `/dashboard/contacts` — CRM for clients and partners (add, edit, delete, search, filter by type)
+- `/dashboard/listings` — Listing management with CRUD, agent assignment, status/source filters
+- `/dashboard/leads` — Inbound lead pipeline from contact form, with conversion to Contact/Listing/Both
+- `/dashboard/communications` — Bulk SMS/email compose with recipient filtering, plus message history
+- `/dashboard/activity` — Audit log of all dashboard actions with entity filters and team notes
+- `/dashboard/calendar` — Embedded Google Calendar
+- `/dashboard/help` — Feature guides for team members
+- `/dashboard/settings` — Password management
 
 Dashboard lives inside the `(public)` route group so it shares the same Header, Footer, and hills background as the rest of the site. Auth protection is handled by middleware (unchanged — checks `/dashboard` path prefix). The dashboard layout renders a horizontal tab bar for sub-navigation instead of a sidebar.
 
@@ -55,13 +60,13 @@ Dashboard lives inside the `(public)` route group so it shares the same Header, 
 - `src/lib/` — Supabase clients, database types, utility functions
 - `src/lib/supabase/` — server, client, and middleware Supabase client helpers
 - `src/lib/schemas/` — Zod validation schemas (contact, listing)
-- `src/data/` — static data (agent profiles in `agents.ts`, services in `services.ts`)
+- `src/data/` — static data (agent profiles in `agents.ts`, services in `services.ts`, resources in `resources.ts`)
 - `supabase/migrations/` — SQL migration files for database schema
 - `middleware.ts` — Supabase auth session refresh + route protection
 
 ### Database
 
-PostgreSQL via Supabase. Tables: `profiles`, `contacts`, `listings`, `contact_listings`, `communications`, `communication_recipients`. Row-level security enabled on all tables. See `supabase/migrations/001_initial_schema.sql` for full schema.
+PostgreSQL via Supabase. Tables: `profiles`, `contacts`, `listings`, `contact_listings`, `communications`, `communication_recipients`, `activity_log`, `listing_inquiries`, `notes`. Row-level security enabled on all tables. See `supabase/migrations/` for full schema and subsequent migrations.
 
 ### Styling
 

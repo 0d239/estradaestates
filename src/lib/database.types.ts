@@ -18,6 +18,8 @@ export type ActivityAction =
 
 export type ActivityEntityType = 'listing' | 'contact' | 'lead' | 'assignment';
 
+export type NoteTarget = 'listing' | 'contact' | 'general';
+
 export interface Database {
   public: {
     Views: Record<string, never>;
@@ -301,6 +303,40 @@ export interface Database {
         };
         Relationships: [];
       };
+      notes: {
+        Row: {
+          id: string;
+          author_id: string;
+          assigned_to: string | null;
+          listing_id: string | null;
+          contact_id: string | null;
+          content: string;
+          is_public: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          author_id: string;
+          assigned_to?: string | null;
+          listing_id?: string | null;
+          contact_id?: string | null;
+          content: string;
+          is_public?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          author_id?: string;
+          assigned_to?: string | null;
+          listing_id?: string | null;
+          contact_id?: string | null;
+          content?: string;
+          is_public?: boolean;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       activity_logs: {
         Row: {
           id: string;
@@ -346,3 +382,6 @@ export type ListingAssignment = Database['public']['Tables']['listing_assignment
 export type ListingAssignmentInsert = Database['public']['Tables']['listing_assignments']['Insert'];
 export type ActivityLog = Database['public']['Tables']['activity_logs']['Row'];
 export type ActivityLogInsert = Database['public']['Tables']['activity_logs']['Insert'];
+export type Note = Database['public']['Tables']['notes']['Row'];
+export type NoteInsert = Database['public']['Tables']['notes']['Insert'];
+export type NoteUpdate = Database['public']['Tables']['notes']['Update'];

@@ -1,13 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Search, Trash2, Pencil, Rss, PenLine, ChevronLeft, ChevronRight, ChevronDown, SlidersHorizontal, UserPlus, X, Check } from 'lucide-react'
+import { Plus, Search, Trash2, Pencil, Rss, PenLine, ChevronLeft, ChevronRight, ChevronDown, SlidersHorizontal, UserPlus, X, Check, Building2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { getListingTags } from '@/lib/utils'
 import { logActivity } from '@/lib/activity-log'
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/Button'
+import { DashboardPageHeader } from '../layout'
 import { ListingForm } from '@/components/dashboard/ListingForm'
 import { DeleteConfirmModal } from '@/components/dashboard/DeleteConfirmModal'
 import type { Listing, ListingStatus, ListingSource, Profile, ListingAssignment } from '@/lib/database.types'
@@ -26,6 +27,13 @@ export default function DashboardListingsPage() {
   const [page, setPage] = useState(0)
   const [deletingListing, setDeletingListing] = useState<Listing | null>(null)
   const [filtersOpen, setFiltersOpen] = useState(false)
+  const [idxWarning, setIdxWarning] = useState(false)
+
+  useEffect(() => {
+    if (!idxWarning) return
+    const t = setTimeout(() => setIdxWarning(false), 4000)
+    return () => clearTimeout(t)
+  }, [idxWarning])
 
   // Fetch all team profiles for assignment
   const { data: profiles } = useQuery({
@@ -128,12 +136,15 @@ export default function DashboardListingsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="hidden md:block text-2xl font-bold text-white">Listings</h1>
-        <Button variant="primary" size="sm" onClick={() => setShowForm(true)} className="ml-auto">
-          <Plus className="w-4 h-4 mr-1" /> Add
-        </Button>
-      </div>
+      <DashboardPageHeader
+        icon={Building2}
+        label="Listings"
+        action={
+          <Button variant="primary" size="sm" onClick={() => setShowForm(true)}>
+            <Plus className="w-4 h-4 mr-1" /> Add
+          </Button>
+        }
+      />
 
       {/* Search */}
       <div className="relative mb-3">
@@ -220,6 +231,19 @@ export default function DashboardListingsPage() {
         />
       )}
 
+      {/* IDX warning toast */}
+      {idxWarning && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <div className="flex items-center gap-3 bg-neutral-900 border border-neutral-700 rounded-xl px-4 py-3 shadow-lg">
+            <Rss className="w-4 h-4 text-primary-400 shrink-0" />
+            <p className="text-sm text-neutral-200">IDX-synced listings can&apos;t be deleted here — manage them from your MLS.</p>
+            <button onClick={() => setIdxWarning(false)} className="text-neutral-500 hover:text-white transition-colors shrink-0">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Listings table */}
       {isLoading ? (
         <div className="text-center text-neutral-400 py-12">Loading listings...</div>
@@ -272,24 +296,22 @@ export default function DashboardListingsPage() {
                       </span>
                     )}
                   </div>
-                  {listing.source === 'manual' ? (
-                    <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1">
+                    {listing.source === 'manual' && (
                       <button
                         onClick={() => handleEdit(listing)}
                         className="p-1.5 text-neutral-500 hover:text-white transition-colors"
                       >
                         <Pencil className="w-3.5 h-3.5" />
                       </button>
-                      <button
-                        onClick={() => setDeletingListing(listing)}
-                        className="p-1.5 text-neutral-500 hover:text-red-400 transition-colors"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  ) : (
-                    <span className="text-[11px] text-neutral-600">Synced</span>
-                  )}
+                    )}
+                    <button
+                      onClick={() => listing.source === 'manual' ? setDeletingListing(listing) : setIdxWarning(true)}
+                      className="p-1.5 text-neutral-500 hover:text-red-400 transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -362,24 +384,22 @@ export default function DashboardListingsPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right">
-                      {listing.source === 'manual' ? (
-                        <div className="flex items-center justify-end gap-1">
+                      <div className="flex items-center justify-end gap-1">
+                        {listing.source === 'manual' && (
                           <button
                             onClick={() => handleEdit(listing)}
                             className="p-1.5 text-neutral-500 hover:text-white transition-colors"
                           >
                             <Pencil className="w-3.5 h-3.5" />
                           </button>
-                          <button
-                            onClick={() => setDeletingListing(listing)}
-                            className="p-1.5 text-neutral-500 hover:text-red-400 transition-colors"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      ) : (
-                        <span className="text-xs text-neutral-600">Synced</span>
-                      )}
+                        )}
+                        <button
+                          onClick={() => listing.source === 'manual' ? setDeletingListing(listing) : setIdxWarning(true)}
+                          className="p-1.5 text-neutral-500 hover:text-red-400 transition-colors"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

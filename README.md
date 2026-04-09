@@ -13,9 +13,9 @@ Live at [estradaestates.com](https://estradaestates.com)
 ### Where we started
 A static React + Vite single-page app hosted on GitHub Pages. It was a clean marketing site — team bios, services, resources — but it had no backend, no auth, no data layer. Everything was hardcoded. It served its purpose as a digital business card, but the team needed real tools.
 
-### What we built (April 7, 2026)
+### The initial build (April 7, 2026)
 
-In a single session, we took this from a static SPA to a full-stack platform:
+In the first session, we took this from a static SPA to a full-stack platform:
 
 1. **Set up Supabase** — PostgreSQL database with Row Level Security, auth system, and typed client helpers (`server`, `client`, `middleware` variants via `@supabase/ssr`)
 2. **Set up Vercel** — Migrated hosting off GitHub Pages onto Vercel with auto-deploy from `main`
@@ -36,14 +36,28 @@ Merged the dashboard into the main site experience:
 4. **Simplified login button** — icon-only (no text) for a cleaner header
 5. **Auth unchanged** — middleware still protects `/dashboard` routes; the `(public)` route group is invisible to URLs
 
+### What we've built since
+
+All of the above goals have been shipped:
+
+- **Listings CRUD** — Full create/edit/delete for manual listings, IDX sync for MLS listings, agent assignment, status lifecycle (Active/Pending/Sold/Off Market), filtering by status and source
+- **Leads system** — Public contact form auto-creates leads with interest flags (Buy/Sell/Design). Leads convert into Contacts, Listings, or both with a single click
+- **Contact management (CRM)** — Client and partner records with buyer preferences (budget, beds/baths, zip codes, radius), seller details, design interests, and notes
+- **Mass communications** — Compose and send bulk SMS or email to filtered contact segments, with full message history
+- **Activity log** — Audit trail of every dashboard action (creates, updates, deletes, conversions, assignments) with team note-taking
+- **Calendar** — Embedded Google Calendar integration
+- **Public listings** — Browse page with filters (city, bedrooms, price range, sort), detail page with photo gallery, agent card, and visitor inquiry form
+- **Featured listings carousel** — Auto-rotating showcase on the homepage (Just Sold, Just Listed, Active)
+- **Design showcase** — Photo gallery on the services page highlighting interior design work
+- **Resources page** — External listing links (MLS portal, Homes.com, Zillow) and mortgage calculator
+
 ### Where we're going
 
-- **Listings CRUD** — Full create/edit/delete flow for listings with image uploads via Supabase Storage
-- **Contact management** — Import, tag, segment, and track client interactions
-- **Mass communications** — Send bulk texts and emails to contact segments
-- **Leads system** — Capture and route inbound leads
-- **Client portal** — Eventually: a login experience for clients to view their transactions
-- **Polish** — Loading states, error boundaries, mobile refinements, SEO
+- **Image uploads** — Supabase Storage for listing photos (currently URL-based)
+- **SMS/email delivery** — Provider integration (Twilio, etc.) for actual message sending
+- **Client portal** — Login experience for clients to view their transactions
+- **IDX automation** — Automated MLS feed sync
+- **Polish** — Loading states, error boundaries, SEO meta tags
 
 ---
 
@@ -89,28 +103,37 @@ app/
   layout.tsx                    # Root layout (fonts, providers)
   (public)/                     # Public routes (Header + Footer)
     page.tsx                    # / — Team page
+    contact/page.tsx            # /contact — lead capture form
     services/page.tsx           # /services
-    resources/page.tsx          # /resources
-    listings/page.tsx           # /listings — browse
-    listings/[id]/page.tsx      # /listings/:id — detail
+    resources/page.tsx          # /resources — links + mortgage calculator
+    listings/page.tsx           # /listings — public browse with filters
+    listings/[id]/page.tsx      # /listings/:id — detail + inquiry form
     login/page.tsx              # /login — team login
-  dashboard/                    # Protected routes (tab bar layout, shares public layout)
-    page.tsx                    # /dashboard — overview
-    contacts/page.tsx           # /dashboard/contacts
-    listings/page.tsx           # /dashboard/listings
-    communications/page.tsx     # /dashboard/communications
+    dashboard/                  # Protected routes (tab bar, shares public layout)
+      page.tsx                  # /dashboard — overview + quick stats
+      contacts/page.tsx         # /dashboard/contacts — CRM (clients + partners)
+      listings/page.tsx         # /dashboard/listings — listing management
+      leads/page.tsx            # /dashboard/leads — inbound lead pipeline
+      communications/page.tsx   # /dashboard/communications — bulk SMS/email
+      activity/page.tsx         # /dashboard/activity — audit log + notes
+      calendar/page.tsx         # /dashboard/calendar — Google Calendar embed
+      help/page.tsx             # /dashboard/help — feature guides for team
+      settings/page.tsx         # /dashboard/settings — password management
 src/
   components/
     ui/                         # Button, Card, Badge, Accordion
     layout/                     # Header, Footer
     dashboard/                  # ContactForm, ListingForm, ComposeMessage
+    FeaturedListings.tsx        # Homepage listing carousel
+    DesignShowcase.tsx          # Services page design gallery
     providers.tsx               # QueryClient + Auth providers
   contexts/                     # AuthContext
   lib/
     supabase/                   # Server, client, middleware helpers
     schemas/                    # Zod validation schemas
+    database.types.ts           # Supabase generated types
     utils.ts                    # cn() utility
-  data/                         # Static data (agents, services)
+  data/                         # Static data (agents, services, resources)
 supabase/
   migrations/                   # SQL schema migrations
 ```

@@ -164,3 +164,6 @@
 .stagger-4 { animation-delay: 450ms; }
 .stagger-5 { animation-delay: 600ms; }
 
+/* Hide scrollbar for featured listings strip */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+

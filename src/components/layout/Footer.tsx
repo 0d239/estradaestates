@@ -8,7 +8,8 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
             <h3 className="font-semibold text-white mb-4">{companyInfo.name}</h3>
-            <p className="text-sm text-neutral-400 mb-4">{companyInfo.tagline}</p>
+            <p className="text-sm text-neutral-400 mb-1">{companyInfo.tagline}</p>
+            <p className="text-xs text-neutral-600 mb-4">A DBA subsidiary of Hilltop Realty</p>
             <div className="flex gap-3">
               <a
                 href={companyInfo.social.instagram}
@@ -66,6 +67,7 @@ export function Footer() {
 
         <div className="border-t border-neutral-800 mt-8 pt-8 text-center text-sm text-neutral-500">
           <p>&copy; {new Date().getFullYear()} {companyInfo.name}. All rights reserved.</p>
+          <p className="mt-1">Estrada Estates Realty Group is a DBA subsidiary of Hilltop Realty.</p>
         </div>
       </div>
     </footer>

@@ -1,9 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { Lock } from 'lucide-react'
+import { Lock, Settings } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/contexts/AuthContext'
+import { DashboardPageHeader } from '../layout'
 
 export default function SettingsPage() {
   const { profile } = useAuth()
@@ -46,12 +47,11 @@ export default function SettingsPage() {
 
   return (
     <div>
-      <div className="hidden md:block mb-8">
-        <h1 className="text-2xl font-semibold text-white">Settings</h1>
-        <p className="text-neutral-400 mt-1">
-          Manage your account{profile ? `, ${profile.name.split(' ')[0]}` : ''}.
-        </p>
-      </div>
+      <DashboardPageHeader
+        icon={Settings}
+        label="Settings"
+        description={`Manage your account${profile ? `, ${profile.name.split(' ')[0]}` : ''}.`}
+      />
 
       <div className="max-w-md">
         <div className="bg-neutral-800/40 border border-neutral-700/50 rounded-2xl p-7">

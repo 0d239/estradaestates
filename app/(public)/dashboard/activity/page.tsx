@@ -2,10 +2,11 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { ChevronLeft, ChevronRight, Send } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Send, Activity } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { logActivity } from '@/lib/activity-log'
 import { useAuth } from '@/contexts/AuthContext'
+import { DashboardPageHeader } from '../layout'
 import type { ActivityLog, ActivityAction, ActivityEntityType, Profile } from '@/lib/database.types'
 
 const PAGE_SIZE = 20
@@ -128,10 +129,11 @@ export default function ActivityPage() {
 
   return (
     <div>
-      <div className="hidden md:block mb-4">
-        <h1 className="text-2xl font-bold text-white">Activity</h1>
-        <p className="text-sm text-neutral-500 mt-1">Audit trail and team notes.</p>
-      </div>
+      <DashboardPageHeader
+        icon={Activity}
+        label="Activity"
+        description="Audit trail and team notes."
+      />
 
       {/* Add note */}
       <div className="flex gap-2 mb-5">
