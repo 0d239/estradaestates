@@ -7,12 +7,12 @@ import { DivisionTabs } from '@/components/ui/DivisionTabs';
 import { DesignShowcase } from '@/components/ui/DesignShowcase';
 import { realtyServices, designServices } from '@/data/services';
 import { cn } from '@/lib/utils';
-import { Search, HardHat, Wrench, Tag } from 'lucide-react';
+import { UserSearch, HardHat, Wrench, Tag } from 'lucide-react';
 import type { RealtyService, DesignServiceCategory } from '@/data/services';
 import type { LucideIcon } from 'lucide-react';
 
 const DESIGN_ICONS: { icon: LucideIcon; label: string }[] = [
-  { icon: Search, label: 'Pre-Purchase' },
+  { icon: UserSearch, label: 'Pre-Purchase' },
   { icon: HardHat, label: 'New Build' },
   { icon: Wrench, label: 'Rehab' },
   { icon: Tag, label: 'Sell / Lease' },
