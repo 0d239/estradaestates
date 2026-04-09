@@ -64,28 +64,38 @@ function AnimatedMetric({ value, label }: { value: string; label: string }) {
 export default function TeamPage() {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Observe all reveal elements
+  // Observe all reveal elements, including ones added dynamically (e.g. tab switches)
   useEffect(() => {
-    const observer = new IntersectionObserver(
+    const container = containerRef.current;
+    if (!container) return;
+
+    const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add('is-visible');
-            observer.unobserve(entry.target);
+            io.unobserve(entry.target);
           }
         });
       },
       { threshold: 0.12, rootMargin: '0px 0px -50px 0px' },
     );
 
-    const container = containerRef.current;
-    if (container) {
-      container.querySelectorAll('.reveal, .reveal-fade, .reveal-scale').forEach((el) => {
-        observer.observe(el);
+    const observeNew = () => {
+      container.querySelectorAll('.reveal:not(.is-visible), .reveal-fade:not(.is-visible), .reveal-scale:not(.is-visible)').forEach((el) => {
+        io.observe(el);
       });
-    }
+    };
 
-    return () => observer.disconnect();
+    observeNew();
+
+    const mo = new MutationObserver(observeNew);
+    mo.observe(container, { childList: true, subtree: true });
+
+    return () => {
+      io.disconnect();
+      mo.disconnect();
+    };
   }, []);
 
   return (
