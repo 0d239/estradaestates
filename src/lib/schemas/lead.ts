@@ -30,3 +30,17 @@ export const leadFormSchema = z
   });
 
 export type LeadFormData = z.infer<typeof leadFormSchema>;
+
+export const listingInquirySchema = z
+  .object({
+    name: z.string().min(1, 'Name is required'),
+    phone: z.string().optional().default(''),
+    email: z.string().email('Invalid email address').optional().or(z.literal('')).default(''),
+    listing_id: z.string().uuid(),
+  })
+  .refine((data) => data.phone || data.email, {
+    message: 'Please provide a phone number or email',
+    path: ['phone'],
+  });
+
+export type ListingInquiryData = z.infer<typeof listingInquirySchema>;

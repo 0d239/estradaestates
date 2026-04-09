@@ -16,13 +16,18 @@ import {
   ArrowUpDown,
   X,
   SlidersHorizontal,
+  MessageCircle,
+  ArrowLeft,
+  CheckCircle,
+  Loader2,
 } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useActionState } from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/Badge';
 import { supabase } from '@/lib/supabase';
 import type { Listing, ListingStatus } from '@/lib/database.types';
+import { submitListingInquiry } from './actions';
 
 // --- Filter chip primitive ---
 
@@ -116,7 +121,7 @@ const BEDROOM_OPTIONS = [1, 2, 3, 4, 5] as const;
 // --- Main page ---
 
 export default function ListingsPage() {
-  const [statusFilters, setStatusFilters] = useState<Set<ListingStatus>>(new Set(['active']));
+  const [statusFilters, setStatusFilters] = useState<Set<ListingStatus>>(new Set());
   const [cityFilters, setCityFilters] = useState<Set<string>>(new Set());
   const [bedroomFilters, setBedroomFilters] = useState<Set<number>>(new Set());
   const [priceRanges, setPriceRanges] = useState<Set<number>>(new Set());
@@ -153,9 +158,9 @@ export default function ListingsPage() {
     return Array.from(citySet).sort();
   }, [listings]);
 
-  // Count active filters (status defaults to 'active' so only count if changed)
+  // Count active filters (status defaults to all/empty so only count if changed)
   const activeFilterCount = [
-    !(statusFilters.size === 1 && statusFilters.has('active')),
+    statusFilters.size > 0,
     cityFilters.size > 0,
     bedroomFilters.size > 0,
     priceRanges.size > 0,
@@ -204,7 +209,7 @@ export default function ListingsPage() {
   }, [listings, statusFilters, cityFilters, bedroomFilters, priceRanges, sort]);
 
   function clearAll() {
-    setStatusFilters(new Set(['active']));
+    setStatusFilters(new Set());
     setCityFilters(new Set());
     setBedroomFilters(new Set());
     setPriceRanges(new Set());
@@ -710,70 +715,216 @@ function FilterContent({
 
 function ListingCard({ listing }: { listing: Listing }) {
   const photoUrl = listing.photos?.[0];
+  const [showInquiry, setShowInquiry] = useState(false);
 
   return (
-    <Link
-      href={`/listings/${listing.id}`}
-      className="bg-neutral-800 border border-neutral-700 rounded-xl overflow-hidden hover:border-neutral-600 transition-colors group"
-    >
-      {/* Photo */}
-      <div className="aspect-[4/3] bg-neutral-800 relative overflow-hidden">
-        {photoUrl ? (
-          <img
-            src={photoUrl}
-            alt={listing.address}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-neutral-600">
-            <Building2 className="w-12 h-12" />
-          </div>
+    <div className="bg-neutral-800 border border-neutral-700 rounded-xl overflow-hidden hover:border-neutral-600 transition-colors group relative">
+      {showInquiry ? (
+        <InquiryForm listing={listing} onBack={() => setShowInquiry(false)} />
+      ) : (
+        <>
+          <Link href={`/listings/${listing.id}`}>
+            {/* Photo */}
+            <div className="aspect-[4/3] bg-neutral-800 relative overflow-hidden">
+              {photoUrl ? (
+                <img
+                  src={photoUrl}
+                  alt={listing.address}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-neutral-600">
+                  <Building2 className="w-12 h-12" />
+                </div>
+              )}
+              <div className="absolute top-3 left-3">
+                <span className="px-2.5 py-1 bg-primary-600/90 text-white text-xs font-semibold rounded-full capitalize">
+                  {listing.status}
+                </span>
+              </div>
+            </div>
+
+            {/* Details */}
+            <div className="p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  {listing.price && (
+                    <p className="text-xl font-bold text-white mb-1">
+                      ${listing.price.toLocaleString()}
+                    </p>
+                  )}
+                  <p className="text-sm text-neutral-300 flex items-center gap-1 mb-3">
+                    <MapPin className="w-3.5 h-3.5 shrink-0" />
+                    <span className="truncate">
+                      {listing.address}
+                      {listing.city && `, ${listing.city}`}
+                      {listing.state && `, ${listing.state}`}
+                    </span>
+                  </p>
+                </div>
+                {/* Inquire button */}
+                <button
+                  type="button"
+                  onClick={(e) => { e.preventDefault(); setShowInquiry(true); }}
+                  className="shrink-0 px-3 py-1.5 bg-neutral-700/80 text-neutral-300 text-xs font-medium rounded-full flex items-center gap-1.5 hover:bg-primary-600 hover:text-white transition-colors"
+                >
+                  <MessageCircle className="w-3.5 h-3.5" />
+                  Inquire
+                </button>
+              </div>
+              <div className="flex items-center gap-4 text-xs text-neutral-400">
+                {listing.bedrooms != null && (
+                  <span className="flex items-center gap-1">
+                    <Bed className="w-3.5 h-3.5" /> {listing.bedrooms} bd
+                  </span>
+                )}
+                {listing.bathrooms != null && (
+                  <span className="flex items-center gap-1">
+                    <Bath className="w-3.5 h-3.5" /> {listing.bathrooms} ba
+                  </span>
+                )}
+                {listing.sqft != null && (
+                  <span className="flex items-center gap-1">
+                    <Maximize className="w-3.5 h-3.5" /> {listing.sqft.toLocaleString()} sqft
+                  </span>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-1.5 mt-3">
+                {getListingTags(listing).map((tag) => (
+                  <span key={tag} className="px-2 py-0.5 bg-neutral-800 text-neutral-400 text-[10px] font-medium rounded-full">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </Link>
+        </>
+      )}
+    </div>
+  );
+}
+
+// --- Inquiry form (replaces card content) ---
+
+function InquiryForm({ listing, onBack }: { listing: Listing; onBack: () => void }) {
+  const [state, formAction, isPending] = useActionState(
+    async (_prev: { error?: Record<string, string[]>; success?: boolean }, formData: FormData) => {
+      return await submitListingInquiry(formData);
+    },
+    {} as { error?: Record<string, string[]>; success?: boolean }
+  );
+
+  const photoUrl = listing.photos?.[0];
+
+  if (state.success) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 text-center min-h-[360px]">
+        <CheckCircle className="w-12 h-12 text-primary-500 mb-4" />
+        <p className="text-lg font-semibold text-white mb-1">Inquiry sent!</p>
+        <p className="text-sm text-neutral-400 mb-6">We&apos;ll be in touch about this property soon.</p>
+        <button
+          type="button"
+          onClick={onBack}
+          className="text-sm text-primary-400 hover:text-primary-300 transition-colors"
+        >
+          Back to listing
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col min-h-[360px]">
+      {/* Mini listing header */}
+      <div className="flex items-center gap-3 p-4 border-b border-neutral-700">
+        <button
+          type="button"
+          onClick={onBack}
+          className="w-8 h-8 rounded-full bg-neutral-700/80 flex items-center justify-center text-neutral-300 hover:text-white transition-colors shrink-0"
+        >
+          <ArrowLeft className="w-4 h-4" />
+        </button>
+        {photoUrl && (
+          <img src={photoUrl} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0" />
         )}
-        <div className="absolute top-3 left-3">
-          <span className="px-2.5 py-1 bg-primary-600/90 text-white text-xs font-semibold rounded-full capitalize">
-            {listing.status}
-          </span>
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-white truncate">
+            {listing.price ? `$${listing.price.toLocaleString()}` : listing.address}
+          </p>
+          <p className="text-xs text-neutral-400 truncate">
+            {listing.address}{listing.city && `, ${listing.city}`}
+          </p>
         </div>
       </div>
 
-      {/* Details */}
-      <div className="p-4">
-        {listing.price && (
-          <p className="text-xl font-bold text-white mb-1">
-            ${listing.price.toLocaleString()}
-          </p>
+      {/* Form */}
+      <form action={formAction} className="flex flex-col flex-1 p-4 gap-3">
+        <input type="hidden" name="listing_id" value={listing.id} />
+
+        <div>
+          <label htmlFor={`name-${listing.id}`} className="block text-xs font-medium text-neutral-400 mb-1">
+            Full Name *
+          </label>
+          <input
+            id={`name-${listing.id}`}
+            name="name"
+            type="text"
+            required
+            placeholder="Your name"
+            className="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-sm text-white placeholder:text-neutral-600 focus:outline-none focus:border-primary-500 transition-colors"
+          />
+          {state.error?.name && <p className="text-xs text-red-400 mt-1">{state.error.name[0]}</p>}
+        </div>
+
+        <div>
+          <label htmlFor={`phone-${listing.id}`} className="block text-xs font-medium text-neutral-400 mb-1">
+            Phone
+          </label>
+          <input
+            id={`phone-${listing.id}`}
+            name="phone"
+            type="tel"
+            placeholder="(555) 555-5555"
+            className="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-sm text-white placeholder:text-neutral-600 focus:outline-none focus:border-primary-500 transition-colors"
+          />
+          {state.error?.phone && <p className="text-xs text-red-400 mt-1">{state.error.phone[0]}</p>}
+        </div>
+
+        <div>
+          <label htmlFor={`email-${listing.id}`} className="block text-xs font-medium text-neutral-400 mb-1">
+            Email
+          </label>
+          <input
+            id={`email-${listing.id}`}
+            name="email"
+            type="email"
+            placeholder="you@example.com"
+            className="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-sm text-white placeholder:text-neutral-600 focus:outline-none focus:border-primary-500 transition-colors"
+          />
+          {state.error?.email && <p className="text-xs text-red-400 mt-1">{state.error.email[0]}</p>}
+        </div>
+
+        <p className="text-[11px] text-neutral-500">Phone or email required so we can reach you.</p>
+
+        {state.error?._form && (
+          <p className="text-xs text-red-400">{state.error._form[0]}</p>
         )}
-        <p className="text-sm text-neutral-300 flex items-center gap-1 mb-3">
-          <MapPin className="w-3.5 h-3.5" />
-          {listing.address}
-          {listing.city && `, ${listing.city}`}
-          {listing.state && `, ${listing.state}`}
-        </p>
-        <div className="flex items-center gap-4 text-xs text-neutral-400">
-          {listing.bedrooms != null && (
-            <span className="flex items-center gap-1">
-              <Bed className="w-3.5 h-3.5" /> {listing.bedrooms} bd
-            </span>
+
+        <button
+          type="submit"
+          disabled={isPending}
+          className="mt-auto w-full py-2.5 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+        >
+          {isPending ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Sending...
+            </>
+          ) : (
+            'Send Inquiry'
           )}
-          {listing.bathrooms != null && (
-            <span className="flex items-center gap-1">
-              <Bath className="w-3.5 h-3.5" /> {listing.bathrooms} ba
-            </span>
-          )}
-          {listing.sqft != null && (
-            <span className="flex items-center gap-1">
-              <Maximize className="w-3.5 h-3.5" /> {listing.sqft.toLocaleString()} sqft
-            </span>
-          )}
-        </div>
-        <div className="flex flex-wrap gap-1.5 mt-3">
-          {getListingTags(listing).map((tag) => (
-            <span key={tag} className="px-2 py-0.5 bg-neutral-800 text-neutral-400 text-[10px] font-medium rounded-full">
-              {tag}
-            </span>
-          ))}
-        </div>
-      </div>
-    </Link>
+        </button>
+      </form>
+    </div>
   );
 }
