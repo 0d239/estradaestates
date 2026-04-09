@@ -40,7 +40,7 @@ export default function CalendarPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
+        <div className="hidden md:block">
           <h1 className="text-2xl font-bold text-white font-display">Calendar</h1>
           <p className="text-neutral-400 text-sm mt-1">
             View your Google Calendar schedule. Sign in to Google separately within the embed.
@@ -51,7 +51,7 @@ export default function CalendarPage() {
             href="https://calendar.google.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 text-sm text-primary-400 hover:text-primary-300 transition-colors"
+            className="flex items-center gap-2 text-sm text-primary-400 hover:text-primary-300 transition-colors ml-auto"
           >
             Open in Google Calendar
             <ExternalLink className="w-4 h-4" />

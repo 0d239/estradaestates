@@ -8,6 +8,7 @@ import { logActivity } from '@/lib/activity-log'
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/Button'
 import { ContactForm } from '@/components/dashboard/ContactForm'
+import { DeleteConfirmModal } from '@/components/dashboard/DeleteConfirmModal'
 import type { Contact, ContactType } from '@/lib/database.types'
 
 const PAGE_SIZE = 15
@@ -20,6 +21,7 @@ export default function ContactsPage() {
   const [showForm, setShowForm] = useState(false)
   const [editingContact, setEditingContact] = useState<Contact | null>(null)
   const [page, setPage] = useState(0)
+  const [deletingContact, setDeletingContact] = useState<Contact | null>(null)
 
   const { data: contacts, isLoading } = useQuery({
     queryKey: ['contacts', typeFilter],
@@ -89,8 +91,8 @@ export default function ContactsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold text-white">Contacts</h1>
-        <Button variant="primary" size="sm" onClick={() => setShowForm(true)}>
+        <h1 className="hidden md:block text-2xl font-bold text-white">Contacts</h1>
+        <Button variant="primary" size="sm" onClick={() => setShowForm(true)} className="ml-auto">
           <Plus className="w-4 h-4 mr-1" /> Add
         </Button>
       </div>
@@ -119,6 +121,21 @@ export default function ContactsPage() {
         <ContactForm
           contact={editingContact}
           onClose={handleCloseForm}
+        />
+      )}
+
+      {/* Delete confirmation modal */}
+      {deletingContact && (
+        <DeleteConfirmModal
+          label="Contact"
+          confirmText={deletingContact.name}
+          isPending={deleteMutation.isPending}
+          onConfirm={() => {
+            deleteMutation.mutate(deletingContact.id, {
+              onSuccess: () => setDeletingContact(null),
+            })
+          }}
+          onClose={() => setDeletingContact(null)}
         />
       )}
 
@@ -180,11 +197,7 @@ export default function ContactsPage() {
                           <Pencil className="w-3.5 h-3.5" />
                         </button>
                         <button
-                          onClick={() => {
-                            if (confirm('Delete this contact?')) {
-                              deleteMutation.mutate(contact.id)
-                            }
-                          }}
+                          onClick={() => setDeletingContact(contact)}
                           className="p-1.5 text-neutral-500 hover:text-red-400 transition-colors"
                         >
                           <Trash2 className="w-3.5 h-3.5" />

@@ -26,8 +26,8 @@ export default function CommunicationsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-white">Messages</h1>
-        <Button variant="primary" onClick={() => setShowCompose(true)}>
+        <h1 className="hidden md:block text-2xl font-bold text-white">Messages</h1>
+        <Button variant="primary" onClick={() => setShowCompose(true)} className="ml-auto">
           <Plus className="w-4 h-4 mr-2" /> Compose
         </Button>
       </div>

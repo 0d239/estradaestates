@@ -9,8 +9,8 @@ import {
 export default function HelpPage() {
   return (
     <div className="max-w-4xl">
-      <h1 className="text-2xl font-bold text-white mb-2">Help</h1>
-      <p className="text-neutral-400 mb-8">
+      <h1 className="hidden md:block text-2xl font-bold text-white mb-2">Help</h1>
+      <p className="hidden md:block text-neutral-400 mb-8">
         How leads and listings work in the dashboard.
       </p>
 

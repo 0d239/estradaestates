@@ -2,13 +2,14 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Search, Trash2, Pencil, Rss, PenLine, ChevronLeft, ChevronRight, UserPlus, X, Check } from 'lucide-react'
+import { Plus, Search, Trash2, Pencil, Rss, PenLine, ChevronLeft, ChevronRight, ChevronDown, SlidersHorizontal, UserPlus, X, Check } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { getListingTags } from '@/lib/utils'
 import { logActivity } from '@/lib/activity-log'
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/Button'
 import { ListingForm } from '@/components/dashboard/ListingForm'
+import { DeleteConfirmModal } from '@/components/dashboard/DeleteConfirmModal'
 import type { Listing, ListingStatus, ListingSource, Profile, ListingAssignment } from '@/lib/database.types'
 
 const PAGE_SIZE = 15
@@ -23,6 +24,8 @@ export default function DashboardListingsPage() {
   const [editingListing, setEditingListing] = useState<Listing | null>(null)
   const [assigningListing, setAssigningListing] = useState<Listing | null>(null)
   const [page, setPage] = useState(0)
+  const [deletingListing, setDeletingListing] = useState<Listing | null>(null)
+  const [filtersOpen, setFiltersOpen] = useState(false)
 
   // Fetch all team profiles for assignment
   const { data: profiles } = useQuery({
@@ -126,8 +129,8 @@ export default function DashboardListingsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold text-white">Listings</h1>
-        <Button variant="primary" size="sm" onClick={() => setShowForm(true)}>
+        <h1 className="hidden md:block text-2xl font-bold text-white">Listings</h1>
+        <Button variant="primary" size="sm" onClick={() => setShowForm(true)} className="ml-auto">
           <Plus className="w-4 h-4 mr-1" /> Add
         </Button>
       </div>
@@ -144,22 +147,66 @@ export default function DashboardListingsPage() {
         />
       </div>
 
-      {/* Filter pills */}
-      <div className="flex flex-wrap items-center gap-1.5 mb-5">
-        <FilterPill active={statusFilter === ''} onClick={() => { setStatusFilter(''); setPage(0) }}>All</FilterPill>
-        <FilterPill active={statusFilter === 'active'} onClick={() => { setStatusFilter('active'); setPage(0) }}>Active</FilterPill>
-        <FilterPill active={statusFilter === 'pending'} onClick={() => { setStatusFilter('pending'); setPage(0) }}>Pending</FilterPill>
-        <FilterPill active={statusFilter === 'sold'} onClick={() => { setStatusFilter('sold'); setPage(0) }}>Sold</FilterPill>
-        <FilterPill active={statusFilter === 'off_market'} onClick={() => { setStatusFilter('off_market'); setPage(0) }}>Off Market</FilterPill>
-        <span className="w-px h-5 bg-neutral-700 mx-1 hidden sm:block" />
-        <FilterPill active={sourceFilter === ''} onClick={() => { setSourceFilter(''); setPage(0) }}>Any Source</FilterPill>
-        <FilterPill active={sourceFilter === 'manual'} onClick={() => { setSourceFilter('manual'); setPage(0) }}>Manual</FilterPill>
-        <FilterPill active={sourceFilter === 'idx'} onClick={() => { setSourceFilter('idx'); setPage(0) }}>IDX</FilterPill>
+      {/* Collapsible filters */}
+      <div className="mb-5">
+        <button
+          type="button"
+          onClick={() => setFiltersOpen((v) => !v)}
+          className="flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors"
+        >
+          <SlidersHorizontal className="w-3.5 h-3.5" />
+          <span>Filters</span>
+          {(statusFilter || sourceFilter) && (
+            <span className="w-4.5 h-4.5 bg-primary-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">
+              {(statusFilter ? 1 : 0) + (sourceFilter ? 1 : 0)}
+            </span>
+          )}
+          <ChevronDown className={`w-3.5 h-3.5 transition-transform ${filtersOpen ? 'rotate-180' : ''}`} />
+        </button>
+        <div className={`overflow-hidden transition-all ${filtersOpen ? 'max-h-48 opacity-100 mt-3' : 'max-h-0 opacity-0'}`}>
+          <div className="space-y-2.5">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-[11px] font-medium text-neutral-500 uppercase tracking-wider mr-1">Status</span>
+              <FilterPill active={statusFilter === ''} onClick={() => { setStatusFilter(''); setPage(0) }}>All</FilterPill>
+              <FilterPill active={statusFilter === 'active'} onClick={() => { setStatusFilter('active'); setPage(0) }}>Active</FilterPill>
+              <FilterPill active={statusFilter === 'pending'} onClick={() => { setStatusFilter('pending'); setPage(0) }}>Pending</FilterPill>
+              <FilterPill active={statusFilter === 'sold'} onClick={() => { setStatusFilter('sold'); setPage(0) }}>Sold</FilterPill>
+              <FilterPill active={statusFilter === 'off_market'} onClick={() => { setStatusFilter('off_market'); setPage(0) }}>Off Market</FilterPill>
+              {statusFilter && (
+                <button type="button" onClick={() => { setStatusFilter(''); setPage(0) }} className="text-[11px] text-neutral-500 hover:text-primary-400 transition-colors ml-1">Clear</button>
+              )}
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-[11px] font-medium text-neutral-500 uppercase tracking-wider mr-1">Source</span>
+              <FilterPill active={sourceFilter === ''} onClick={() => { setSourceFilter(''); setPage(0) }}>Any</FilterPill>
+              <FilterPill active={sourceFilter === 'manual'} onClick={() => { setSourceFilter('manual'); setPage(0) }}>Manual</FilterPill>
+              <FilterPill active={sourceFilter === 'idx'} onClick={() => { setSourceFilter('idx'); setPage(0) }}>IDX</FilterPill>
+              {sourceFilter && (
+                <button type="button" onClick={() => { setSourceFilter(''); setPage(0) }} className="text-[11px] text-neutral-500 hover:text-primary-400 transition-colors ml-1">Clear</button>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Listing form modal */}
       {showForm && (
         <ListingForm listing={editingListing} onClose={handleCloseForm} />
+      )}
+
+      {/* Delete confirmation modal */}
+      {deletingListing && (
+        <DeleteConfirmModal
+          label="Listing"
+          confirmText={deletingListing.address}
+          isPending={deleteMutation.isPending}
+          onConfirm={() => {
+            deleteMutation.mutate(deletingListing.id, {
+              onSuccess: () => setDeletingListing(null),
+            })
+          }}
+          onClose={() => setDeletingListing(null)}
+        />
       )}
 
       {/* Assignment modal */}
@@ -182,24 +229,91 @@ export default function DashboardListingsPage() {
         </div>
       ) : (
         <>
-          <div className="bg-neutral-900 border border-neutral-800 rounded-xl overflow-hidden">
+          {/* Mobile card list */}
+          <div className="md:hidden space-y-2">
+            {paginated.map((listing) => (
+              <div key={listing.id} className="bg-neutral-900 border border-neutral-800 rounded-xl p-3">
+                <div className="flex items-start justify-between gap-2 mb-1.5">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-white truncate">{listing.address}</p>
+                    <p className="text-xs text-neutral-500 truncate">
+                      {[listing.city, listing.state, listing.zip].filter(Boolean).join(', ')}
+                    </p>
+                  </div>
+                  <span
+                    className={`shrink-0 inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium capitalize ${
+                      statusColors[listing.status]
+                    }`}
+                  >
+                    {listing.status.replace('_', ' ')}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-3 text-xs text-neutral-400 mb-2">
+                  {listing.price && (
+                    <span className="font-medium text-neutral-200">${listing.price.toLocaleString()}</span>
+                  )}
+                  {listing.bedrooms != null && <span>{listing.bedrooms}bd</span>}
+                  {listing.bathrooms != null && <span>{listing.bathrooms}ba</span>}
+                  {listing.sqft != null && <span>{listing.sqft.toLocaleString()} sqft</span>}
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <AgentBadges
+                      listingId={listing.id}
+                      assignments={assignments}
+                      profiles={profiles}
+                      onAssign={() => setAssigningListing(listing)}
+                    />
+                    {listing.source === 'idx' && (
+                      <span className="inline-flex items-center gap-1 text-[11px] text-neutral-500">
+                        <Rss className="w-3 h-3" /> IDX
+                      </span>
+                    )}
+                  </div>
+                  {listing.source === 'manual' ? (
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => handleEdit(listing)}
+                        className="p-1.5 text-neutral-500 hover:text-white transition-colors"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => setDeletingListing(listing)}
+                        className="p-1.5 text-neutral-500 hover:text-red-400 transition-colors"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <span className="text-[11px] text-neutral-600">Synced</span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop table */}
+          <div className="hidden md:block bg-neutral-900 border border-neutral-800 rounded-xl overflow-hidden">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-neutral-800">
-                  <th className="text-left px-3 sm:px-4 py-3 text-xs font-medium text-neutral-500 uppercase">Address</th>
-                  <th className="text-left px-3 sm:px-4 py-3 text-xs font-medium text-neutral-500 uppercase">Status</th>
-                  <th className="text-left px-3 sm:px-4 py-3 text-xs font-medium text-neutral-500 uppercase">Agents</th>
-                  <th className="text-left px-3 sm:px-4 py-3 text-xs font-medium text-neutral-500 uppercase hidden md:table-cell">Price</th>
-                  <th className="text-left px-3 sm:px-4 py-3 text-xs font-medium text-neutral-500 uppercase hidden md:table-cell">Beds/Baths</th>
-                  <th className="text-left px-3 sm:px-4 py-3 text-xs font-medium text-neutral-500 uppercase hidden lg:table-cell">MLS #</th>
-                  <th className="text-left px-3 sm:px-4 py-3 text-xs font-medium text-neutral-500 uppercase hidden md:table-cell">Source</th>
-                  <th className="text-right px-3 sm:px-4 py-3 text-xs font-medium text-neutral-500 uppercase w-20"></th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500 uppercase">Address</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500 uppercase">Status</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500 uppercase">Agents</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500 uppercase">Price</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500 uppercase">Beds/Baths</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500 uppercase hidden lg:table-cell">MLS #</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500 uppercase">Source</th>
+                  <th className="text-right px-4 py-3 text-xs font-medium text-neutral-500 uppercase w-20"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-800">
                 {paginated.map((listing) => (
                   <tr key={listing.id} className="hover:bg-neutral-800/50 transition-colors">
-                    <td className="px-3 sm:px-4 py-3">
+                    <td className="px-4 py-3">
                       <p className="text-sm font-medium text-white">{listing.address}</p>
                       <p className="text-xs text-neutral-500">
                         {[listing.city, listing.state, listing.zip].filter(Boolean).join(', ')}
@@ -211,14 +325,8 @@ export default function DashboardListingsPage() {
                           </span>
                         ))}
                       </div>
-                      {/* Show price on mobile under address */}
-                      <p className="text-xs text-neutral-400 mt-0.5 md:hidden">
-                        {listing.price ? `$${listing.price.toLocaleString()}` : ''}
-                        {listing.price && (listing.bedrooms || listing.bathrooms) ? ' · ' : ''}
-                        {(listing.bedrooms || listing.bathrooms) ? `${listing.bedrooms ?? '—'}bd / ${listing.bathrooms ?? '—'}ba` : ''}
-                      </p>
                     </td>
-                    <td className="px-3 sm:px-4 py-3">
+                    <td className="px-4 py-3">
                       <span
                         className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium capitalize ${
                           statusColors[listing.status]
@@ -227,7 +335,7 @@ export default function DashboardListingsPage() {
                         {listing.status.replace('_', ' ')}
                       </span>
                     </td>
-                    <td className="px-3 sm:px-4 py-3">
+                    <td className="px-4 py-3">
                       <AgentBadges
                         listingId={listing.id}
                         assignments={assignments}
@@ -235,16 +343,16 @@ export default function DashboardListingsPage() {
                         onAssign={() => setAssigningListing(listing)}
                       />
                     </td>
-                    <td className="px-3 sm:px-4 py-3 text-sm text-neutral-300 hidden md:table-cell">
+                    <td className="px-4 py-3 text-sm text-neutral-300">
                       {listing.price ? `$${listing.price.toLocaleString()}` : '—'}
                     </td>
-                    <td className="px-3 sm:px-4 py-3 text-sm text-neutral-400 hidden md:table-cell">
+                    <td className="px-4 py-3 text-sm text-neutral-400">
                       {listing.bedrooms ?? '—'} / {listing.bathrooms ?? '—'}
                     </td>
-                    <td className="px-3 sm:px-4 py-3 text-sm text-neutral-400 hidden lg:table-cell">
+                    <td className="px-4 py-3 text-sm text-neutral-400 hidden lg:table-cell">
                       {listing.mls_number || '—'}
                     </td>
-                    <td className="px-3 sm:px-4 py-3 hidden md:table-cell">
+                    <td className="px-4 py-3">
                       <span className="inline-flex items-center gap-1 text-xs text-neutral-400">
                         {listing.source === 'idx' ? (
                           <><Rss className="w-3 h-3" /> IDX</>
@@ -253,7 +361,7 @@ export default function DashboardListingsPage() {
                         )}
                       </span>
                     </td>
-                    <td className="px-3 sm:px-4 py-3 text-right">
+                    <td className="px-4 py-3 text-right">
                       {listing.source === 'manual' ? (
                         <div className="flex items-center justify-end gap-1">
                           <button
@@ -263,11 +371,7 @@ export default function DashboardListingsPage() {
                             <Pencil className="w-3.5 h-3.5" />
                           </button>
                           <button
-                            onClick={() => {
-                              if (confirm('Delete this listing?')) {
-                                deleteMutation.mutate(listing.id)
-                              }
-                            }}
+                            onClick={() => setDeletingListing(listing)}
                             className="p-1.5 text-neutral-500 hover:text-red-400 transition-colors"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -285,7 +389,7 @@ export default function DashboardListingsPage() {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-4 text-sm">
+            <div className="flex items-center justify-between mt-4 text-sm md:flex-row-reverse">
               <span className="text-neutral-500">
                 {safePage * PAGE_SIZE + 1}–{Math.min((safePage + 1) * PAGE_SIZE, total)} of {total}
               </span>

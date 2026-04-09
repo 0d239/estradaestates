@@ -87,7 +87,7 @@ export default function LeadsPage() {
 
   return (
     <div>
-      <div className="mb-4">
+      <div className="hidden md:block mb-4">
         <h1 className="text-2xl font-bold text-white">Leads</h1>
         <p className="text-sm text-neutral-500 mt-1">
           Incoming leads from the contact form.

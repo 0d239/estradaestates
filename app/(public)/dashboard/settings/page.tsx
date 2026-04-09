@@ -46,7 +46,7 @@ export default function SettingsPage() {
 
   return (
     <div>
-      <div className="mb-8">
+      <div className="hidden md:block mb-8">
         <h1 className="text-2xl font-semibold text-white">Settings</h1>
         <p className="text-neutral-400 mt-1">
           Manage your account{profile ? `, ${profile.name.split(' ')[0]}` : ''}.

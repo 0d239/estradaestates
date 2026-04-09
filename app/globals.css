@@ -109,20 +109,6 @@
   animation: slide-up 0.25s ease-out;
 }
 
-/* Scroll-snap: non-linear scroll rhythm */
-.snap-scroll {
-  /* Disable snap on mobile — proximity snapping fights touch scrolling
-     during animated metric counting and general swipe gestures. */
-  @media (min-width: 768px) {
-    scroll-snap-type: y proximity;
-  }
-}
-
-.snap-section {
-  scroll-snap-align: start;
-  scroll-snap-stop: normal;
-}
-
 /* Scroll-driven reveal animations */
 @keyframes reveal-up {
   from {

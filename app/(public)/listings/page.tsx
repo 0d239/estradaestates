@@ -256,7 +256,7 @@ export default function ListingsPage() {
 
           {/* Desktop sidebar filters */}
           <aside className="hidden lg:block w-72 shrink-0">
-            <div className="bg-black/70 backdrop-blur-md border border-neutral-800 rounded-2xl p-5 sticky top-20">
+            <div className="bg-neutral-800 border border-neutral-700 rounded-2xl p-5 sticky top-20">
               <div className="flex items-center justify-between mb-5">
                 <h2 className="text-sm font-semibold text-white flex items-center gap-2">
                   <SlidersHorizontal className="w-4 h-4" />
@@ -316,7 +316,7 @@ export default function ListingsPage() {
             {isLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="bg-neutral-900/90 backdrop-blur-md border border-neutral-800 rounded-xl overflow-hidden animate-pulse">
+                  <div key={i} className="bg-neutral-800 border border-neutral-700 rounded-xl overflow-hidden animate-pulse">
                     <div className="aspect-[4/3] bg-neutral-800" />
                     <div className="p-4 space-y-3">
                       <div className="h-5 bg-neutral-800 rounded w-1/2" />
@@ -714,7 +714,7 @@ function ListingCard({ listing }: { listing: Listing }) {
   return (
     <Link
       href={`/listings/${listing.id}`}
-      className="bg-neutral-900/90 backdrop-blur-md border border-neutral-800 rounded-xl overflow-hidden hover:border-neutral-700 transition-colors group"
+      className="bg-neutral-800 border border-neutral-700 rounded-xl overflow-hidden hover:border-neutral-600 transition-colors group"
     >
       {/* Photo */}
       <div className="aspect-[4/3] bg-neutral-800 relative overflow-hidden">

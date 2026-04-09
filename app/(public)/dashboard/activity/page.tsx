@@ -128,7 +128,7 @@ export default function ActivityPage() {
 
   return (
     <div>
-      <div className="mb-4">
+      <div className="hidden md:block mb-4">
         <h1 className="text-2xl font-bold text-white">Activity</h1>
         <p className="text-sm text-neutral-500 mt-1">Audit trail and team notes.</p>
       </div>
