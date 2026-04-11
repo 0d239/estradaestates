@@ -167,6 +167,8 @@ export interface Database {
           idx_key: string | null;
           idx_synced_at: string | null;
           idx_removed_at: string | null;
+          latitude: number | null;
+          longitude: number | null;
           created_at: string;
           updated_at: string;
         };
@@ -191,6 +193,8 @@ export interface Database {
           idx_key?: string | null;
           idx_synced_at?: string | null;
           idx_removed_at?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -215,6 +219,8 @@ export interface Database {
           idx_key?: string | null;
           idx_synced_at?: string | null;
           idx_removed_at?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
           updated_at?: string;
         };
         Relationships: [];

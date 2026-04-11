@@ -42,6 +42,69 @@ function categorize(listings: Listing[]): Record<Category, Listing[]> {
   return { sold, listed, active }
 }
 
+function ListingCard({ listing, fading }: { listing: Listing; fading: boolean }) {
+  const photo = listing.photos?.[0]
+  return (
+    <Link
+      href={`/listings/${listing.id}`}
+      className={cn(
+        'block bg-neutral-800 border border-neutral-700 rounded-xl overflow-hidden hover:border-neutral-600 transition-all duration-300 group',
+        fading ? 'opacity-0 scale-[0.97]' : 'opacity-100 scale-100',
+      )}
+    >
+      <div className="aspect-[4/3] bg-neutral-900 relative overflow-hidden">
+        {photo ? (
+          <img
+            src={photo}
+            alt={listing.address}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-neutral-700">
+            <Building2 className="w-12 h-12" />
+          </div>
+        )}
+        <div className="absolute top-3 left-3">
+          <span className="px-2.5 py-1 bg-primary-600/90 text-white text-xs font-semibold rounded-full capitalize">
+            {listing.status}
+          </span>
+        </div>
+      </div>
+      <div className="p-5">
+        {listing.price && (
+          <p className="text-2xl font-bold text-white mb-1">
+            ${listing.price.toLocaleString()}
+          </p>
+        )}
+        <p className="text-sm text-neutral-300 flex items-center gap-1.5 mb-3">
+          <MapPin className="w-4 h-4 shrink-0" />
+          {listing.address}
+          {listing.city && `, ${listing.city}`}
+          {listing.state && `, ${listing.state}`}
+        </p>
+        <div className="flex items-center gap-4 text-sm text-neutral-400">
+          {listing.bedrooms != null && (
+            <span className="flex items-center gap-1.5">
+              <Bed className="w-4 h-4" /> {listing.bedrooms} bd
+            </span>
+          )}
+          {listing.bathrooms != null && (
+            <span className="flex items-center gap-1.5">
+              <Bath className="w-4 h-4" /> {listing.bathrooms} ba
+            </span>
+          )}
+          {listing.sqft != null && (
+            <span className="flex items-center gap-1.5">
+              <Maximize className="w-4 h-4" />{' '}
+              {listing.sqft.toLocaleString()} sqft
+            </span>
+          )}
+        </div>
+      </div>
+    </Link>
+  )
+}
+
 export function FeaturedListings() {
   const { data: listings } = useQuery({
     queryKey: ['listings', 'featured'],
@@ -152,8 +215,6 @@ export function FeaturedListings() {
 
   if (!groups || availableCategories.length === 0) return null
 
-  const photo = activeListing?.photos?.[0]
-
   return (
     <section className="container-narrow mb-24 reveal-fade">
       {/* Category label */}
@@ -216,112 +277,59 @@ export function FeaturedListings() {
         </div>
       )}
 
-      {/* Single listing card */}
-      {activeListing && (
+      {/* Desktop: 3-column grid, Mobile: single card carousel */}
+      {currentListings.length > 0 && (
         <div
           onPointerEnter={onPointerEnter}
           onPointerLeave={onPointerLeave}
           onTouchStart={onPointerEnter}
           onTouchEnd={onPointerLeave}
-          className="max-w-lg mx-auto"
         >
-          <Link
-            href={`/listings/${activeListing.id}`}
-            className={cn(
-              'block bg-neutral-800 border border-neutral-700 rounded-xl overflow-hidden hover:border-neutral-600 transition-all duration-300 group',
-              listingFading
-                ? 'opacity-0 scale-[0.97]'
-                : 'opacity-100 scale-100',
-            )}
-          >
-            {/* Photo */}
-            <div className="aspect-[4/3] bg-neutral-900 relative overflow-hidden">
-              {photo ? (
-                <img
-                  src={photo}
-                  alt={activeListing.address}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-neutral-700">
-                  <Building2 className="w-12 h-12" />
+          {/* Desktop grid — show up to 3 */}
+          <div className="hidden md:grid md:grid-cols-3 gap-6">
+            {currentListings.slice(0, 3).map((listing) => (
+              <ListingCard key={listing.id} listing={listing} fading={catFading} />
+            ))}
+          </div>
+
+          {/* Mobile single card carousel */}
+          <div className="md:hidden max-w-lg mx-auto">
+            <ListingCard listing={activeListing!} fading={listingFading} />
+
+            {currentListings.length > 1 && (
+              <div className="flex items-center justify-center gap-3 mt-4">
+                <button
+                  type="button"
+                  onClick={prevListing}
+                  className="w-7 h-7 rounded-full bg-neutral-800 hover:bg-neutral-700 text-neutral-400 hover:text-white flex items-center justify-center transition-colors"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                </button>
+                <div className="flex gap-1.5">
+                  {currentListings.map((_, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => goToListing(i)}
+                      className={cn(
+                        'w-1.5 h-1.5 rounded-full transition-all duration-300',
+                        i === safeListingIdx
+                          ? 'w-3 bg-neutral-300'
+                          : 'bg-neutral-700 hover:bg-neutral-500',
+                      )}
+                    />
+                  ))}
                 </div>
-              )}
-              <div className="absolute top-3 left-3">
-                <span className="px-2.5 py-1 bg-primary-600/90 text-white text-xs font-semibold rounded-full capitalize">
-                  {activeListing.status}
-                </span>
+                <button
+                  type="button"
+                  onClick={nextListing}
+                  className="w-7 h-7 rounded-full bg-neutral-800 hover:bg-neutral-700 text-neutral-400 hover:text-white flex items-center justify-center transition-colors"
+                >
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
               </div>
-            </div>
-
-            {/* Details */}
-            <div className="p-5">
-              {activeListing.price && (
-                <p className="text-2xl font-bold text-white mb-1">
-                  ${activeListing.price.toLocaleString()}
-                </p>
-              )}
-              <p className="text-sm text-neutral-300 flex items-center gap-1.5 mb-3">
-                <MapPin className="w-4 h-4 shrink-0" />
-                {activeListing.address}
-                {activeListing.city && `, ${activeListing.city}`}
-                {activeListing.state && `, ${activeListing.state}`}
-              </p>
-              <div className="flex items-center gap-4 text-sm text-neutral-400">
-                {activeListing.bedrooms != null && (
-                  <span className="flex items-center gap-1.5">
-                    <Bed className="w-4 h-4" /> {activeListing.bedrooms} bd
-                  </span>
-                )}
-                {activeListing.bathrooms != null && (
-                  <span className="flex items-center gap-1.5">
-                    <Bath className="w-4 h-4" /> {activeListing.bathrooms} ba
-                  </span>
-                )}
-                {activeListing.sqft != null && (
-                  <span className="flex items-center gap-1.5">
-                    <Maximize className="w-4 h-4" />{' '}
-                    {activeListing.sqft.toLocaleString()} sqft
-                  </span>
-                )}
-              </div>
-            </div>
-          </Link>
-
-          {/* Listing dots / nav */}
-          {currentListings.length > 1 && (
-            <div className="flex items-center justify-center gap-3 mt-4">
-              <button
-                type="button"
-                onClick={prevListing}
-                className="w-7 h-7 rounded-full bg-neutral-800 hover:bg-neutral-700 text-neutral-400 hover:text-white flex items-center justify-center transition-colors"
-              >
-                <ChevronLeft className="w-3.5 h-3.5" />
-              </button>
-              <div className="flex gap-1.5">
-                {currentListings.map((_, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => goToListing(i)}
-                    className={cn(
-                      'w-1.5 h-1.5 rounded-full transition-all duration-300',
-                      i === safeListingIdx
-                        ? 'w-3 bg-neutral-300'
-                        : 'bg-neutral-700 hover:bg-neutral-500',
-                    )}
-                  />
-                ))}
-              </div>
-              <button
-                type="button"
-                onClick={nextListing}
-                className="w-7 h-7 rounded-full bg-neutral-800 hover:bg-neutral-700 text-neutral-400 hover:text-white flex items-center justify-center transition-colors"
-              >
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )}
 

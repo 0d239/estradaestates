@@ -1,19 +1,30 @@
 'use client'
 
+import { useState } from 'react'
 import {
   UserPlus,
   Building2,
   ArrowRightLeft,
   HelpCircle,
-  Users,
   MessageSquare,
   Activity,
-  Calendar,
-  Eye,
+  type LucideIcon,
 } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { DashboardPageHeader } from '../layout'
 
+const sections = [
+  { key: 'leads', label: 'Leads', icon: UserPlus },
+  { key: 'listings', label: 'Listings', icon: Building2 },
+  { key: 'messages', label: 'Messages', icon: MessageSquare },
+  { key: 'activity', label: 'Activity', icon: Activity },
+] as const
+
+type SectionKey = (typeof sections)[number]['key']
+
 export default function HelpPage() {
+  const [active, setActive] = useState<SectionKey>('leads')
+
   return (
     <div className="max-w-4xl">
       <DashboardPageHeader
@@ -22,9 +33,27 @@ export default function HelpPage() {
         description="How the dashboard tools work — leads, contacts, listings, messages, and more."
       />
 
-      <div className="space-y-6">
-        {/* Leads */}
-        <Section
+      {/* Navigation row */}
+      <div className="flex flex-wrap gap-2 mb-6">
+        {sections.map(({ key, label, icon: Icon }) => (
+          <button
+            key={key}
+            onClick={() => setActive(key)}
+            className={cn(
+              'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
+              active === key
+                ? 'bg-primary-900/50 text-primary-300 border border-primary-700'
+                : 'bg-neutral-900 text-neutral-400 border border-neutral-800 hover:text-neutral-200 hover:border-neutral-700'
+            )}
+          >
+            <Icon className="w-4 h-4" />
+            {label}
+          </button>
+        ))}
+      </div>
+
+      <div>
+        {active === 'leads' && <Section
           icon={UserPlus}
           title="Leads"
           content={
@@ -74,42 +103,9 @@ export default function HelpPage() {
               </div>
             </>
           }
-        />
+        />}
 
-        {/* Contacts */}
-        <Section
-          icon={Users}
-          title="Contacts"
-          content={
-            <>
-              <p>
-                Contacts are the people you&apos;re actively working with — <strong>clients</strong> (buyers
-                and sellers) and <strong>partners</strong> (lenders, inspectors, contractors, etc.).
-                Unlike leads, contacts are people you&apos;ve already reached out to and have a
-                relationship with.
-              </p>
-              <p>
-                Each contact stores their name, phone, email, address, company, birthday, and notes.
-                For buyer clients, you can also track their <strong>budget</strong>, preferred
-                bedrooms/bathrooms, zip codes, and search radius. For sellers, you can note their
-                property zip code and estimated value.
-              </p>
-
-              <div className="bg-neutral-800/50 border border-neutral-700 rounded-lg p-4 mt-3">
-                <p className="text-sm font-semibold text-white mb-2">Tips</p>
-                <ul className="text-sm space-y-1">
-                  <li>Use the <strong>Client</strong> / <strong>Partner</strong> filter to quickly switch between the two groups.</li>
-                  <li>Search works across name, email, phone, address, and company.</li>
-                  <li>Contacts created from lead conversion are automatically tagged as clients with their original details carried over.</li>
-                  <li>Contacts with a phone number or email can be selected as recipients in the <strong>Messages</strong> tab.</li>
-                </ul>
-              </div>
-            </>
-          }
-        />
-
-        {/* Listings */}
-        <Section
+        {active === 'listings' && <Section
           icon={Building2}
           title="Listings"
           content={
@@ -162,10 +158,9 @@ export default function HelpPage() {
               </div>
             </>
           }
-        />
+        />}
 
-        {/* Messages */}
-        <Section
+        {active === 'messages' && <Section
           icon={MessageSquare}
           title="Messages"
           content={
@@ -190,10 +185,9 @@ export default function HelpPage() {
               </div>
             </>
           }
-        />
+        />}
 
-        {/* Activity Log */}
-        <Section
+        {active === 'activity' && <Section
           icon={Activity}
           title="Activity Log"
           content={
@@ -218,56 +212,8 @@ export default function HelpPage() {
               </div>
             </>
           }
-        />
+        />}
 
-        {/* Calendar */}
-        <Section
-          icon={Calendar}
-          title="Calendar"
-          content={
-            <>
-              <p>
-                The Calendar tab embeds your <strong>Google Calendar</strong> directly into the
-                dashboard. Enter your Google Calendar ID (usually your Gmail address) and your
-                schedule will appear inline — no need to switch apps.
-              </p>
-
-              <div className="bg-neutral-800/50 border border-neutral-700 rounded-lg p-4 mt-3">
-                <p className="text-sm font-semibold text-white mb-2">Setup</p>
-                <ul className="text-sm space-y-1">
-                  <li>Your <strong>Calendar ID</strong> is typically your Gmail address (e.g., <code>you@gmail.com</code>).</li>
-                  <li>Make sure your calendar is set to <strong>public</strong> in Google Calendar settings, or the embed won&apos;t load.</li>
-                  <li>You can view and navigate your calendar here, or click the link to open the full Google Calendar.</li>
-                </ul>
-              </div>
-            </>
-          }
-        />
-
-        {/* Public Website */}
-        <Section
-          icon={Eye}
-          title="What Visitors See"
-          content={
-            <>
-              <p>
-                The public website at <strong>estradaestates.com</strong> pulls directly from the same
-                data you manage here. Here&apos;s what visitors interact with:
-              </p>
-              <ul>
-                <li><strong>Listings page</strong> — shows all Active, Pending, and Sold listings with filters for city, bedrooms, price, and sorting options.</li>
-                <li><strong>Listing detail</strong> — full property info with photos, description, assigned agent contact card, and an inquiry form.</li>
-                <li><strong>Contact form</strong> — captures buyer/seller/design interest and creates a lead in your Leads tab.</li>
-                <li><strong>Team page</strong> — agent bios and office info.</li>
-                <li><strong>Services &amp; Resources</strong> — brokerage and design service descriptions, FAQs, mortgage calculator, and external listing links.</li>
-              </ul>
-              <p className="text-neutral-400">
-                When you update a listing status or add a new listing, it shows up on the public site
-                right away. Keeping your data current here means the website stays current too.
-              </p>
-            </>
-          }
-        />
       </div>
     </div>
   )
@@ -278,7 +224,7 @@ function Section({
   title,
   content,
 }: {
-  icon: typeof UserPlus
+  icon: LucideIcon
   title: string
   content: React.ReactNode
 }) {

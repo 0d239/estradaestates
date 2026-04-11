@@ -85,12 +85,12 @@ export function Header() {
 
           {/* Desktop: logo on the left */}
           <Link href={logoHref} className="hidden md:flex items-center gap-2.5">
-            <img src="/hills.svg" alt="Estrada Estates" className="h-9 w-auto logo-glow" />
+            <img src="/hills_high_res gold.png" alt="Estrada Estates" className="h-32 w-auto scale-150 object-contain logo-glow" />
           </Link>
 
           {/* Mobile: centered logo */}
           <Link href={logoHref} className="md:hidden absolute left-1/2 -translate-x-1/2">
-            <img src="/hills.svg" alt="Estrada Estates" className="h-9 w-auto logo-glow" />
+            <img src="/hills_high_res gold.png" alt="Estrada Estates" className="h-32 w-auto scale-150 object-contain logo-glow" />
           </Link>
 
           {/* Desktop nav */}

@@ -27,6 +27,8 @@ export default function DashboardListingsPage() {
   const [page, setPage] = useState(0)
   const [deletingListing, setDeletingListing] = useState<Listing | null>(null)
   const [filtersOpen, setFiltersOpen] = useState(false)
+  const [statusOpen, setStatusOpen] = useState(true)
+  const [sourceOpen, setSourceOpen] = useState(true)
   const [idxWarning, setIdxWarning] = useState(false)
 
   useEffect(() => {
@@ -135,66 +137,153 @@ export default function DashboardListingsPage() {
   }
 
   return (
-    <div>
-      <DashboardPageHeader
-        icon={Building2}
-        label="Listings"
-        action={
-          <Button variant="primary" size="sm" onClick={() => setShowForm(true)}>
-            <Plus className="w-4 h-4 mr-1" /> Add
-          </Button>
-        }
-      />
-
-      {/* Search */}
-      <div className="relative mb-3">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
-        <input
-          type="text"
-          placeholder="Search listings..."
-          value={search}
-          onChange={(e) => { setSearch(e.target.value); setPage(0) }}
-          className="w-full pl-10 pr-4 py-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+    <div className="flex flex-col h-[calc(100vh-12rem)] md:h-[calc(100vh-10rem)] overflow-hidden">
+      {/* Header */}
+      <div className="shrink-0">
+        <DashboardPageHeader
+          icon={Building2}
+          label="Listings"
+          action={
+            <Button variant="primary" size="sm" onClick={() => setShowForm(true)}>
+              <Plus className="w-4 h-4 mr-1" /> Add
+            </Button>
+          }
         />
       </div>
 
-      {/* Collapsible filters */}
-      <div className="mb-5">
-        <button
-          type="button"
-          onClick={() => setFiltersOpen((v) => !v)}
-          className="flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors"
-        >
-          <SlidersHorizontal className="w-3.5 h-3.5" />
-          <span>Filters</span>
-          {(statusFilter || sourceFilter) && (
-            <span className="w-4.5 h-4.5 bg-primary-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">
-              {(statusFilter ? 1 : 0) + (sourceFilter ? 1 : 0)}
-            </span>
-          )}
-          <ChevronDown className={`w-3.5 h-3.5 transition-transform ${filtersOpen ? 'rotate-180' : ''}`} />
-        </button>
-        <div className={`overflow-hidden transition-all ${filtersOpen ? 'max-h-48 opacity-100 mt-3' : 'max-h-0 opacity-0'}`}>
-          <div className="space-y-2.5">
-            <div className="flex flex-wrap items-center gap-1.5">
-              <span className="text-[11px] font-medium text-neutral-500 uppercase tracking-wider mr-1">Status</span>
+      {/* Desktop: horizontal filter bar */}
+      <div className="shrink-0 hidden md:flex items-center gap-3 mb-4 flex-wrap">
+        {/* Search */}
+        <div className="relative w-56">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+          <input
+            type="text"
+            placeholder="Search listings..."
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(0) }}
+            className="w-full pl-10 pr-4 py-1.5 bg-neutral-800 border border-neutral-700 rounded-lg text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+          />
+        </div>
+
+        <div className="w-px h-6 bg-neutral-700" />
+
+        {/* Status filter group */}
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => setStatusOpen((v) => !v)}
+            className="flex items-center gap-1 text-[11px] font-medium text-neutral-500 uppercase tracking-wider hover:text-neutral-300 transition-colors"
+          >
+            Status
+            {!statusOpen && statusFilter && (
+              <span className="normal-case tracking-normal text-primary-400">
+                : {statusFilter.replace('_', ' ')}
+              </span>
+            )}
+            <ChevronDown className={`w-3 h-3 transition-transform ${statusOpen ? 'rotate-180' : ''}`} />
+          </button>
+          {statusOpen && (
+            <>
               <FilterPill active={statusFilter === ''} onClick={() => { setStatusFilter(''); setPage(0) }}>All</FilterPill>
               <FilterPill active={statusFilter === 'active'} onClick={() => { setStatusFilter('active'); setPage(0) }}>Active</FilterPill>
               <FilterPill active={statusFilter === 'pending'} onClick={() => { setStatusFilter('pending'); setPage(0) }}>Pending</FilterPill>
               <FilterPill active={statusFilter === 'sold'} onClick={() => { setStatusFilter('sold'); setPage(0) }}>Sold</FilterPill>
               <FilterPill active={statusFilter === 'off_market'} onClick={() => { setStatusFilter('off_market'); setPage(0) }}>Off Market</FilterPill>
-              {statusFilter && (
-                <button type="button" onClick={() => { setStatusFilter(''); setPage(0) }} className="text-[11px] text-neutral-500 hover:text-primary-400 transition-colors ml-1">Clear</button>
-              )}
-            </div>
-            <div className="flex flex-wrap items-center gap-1.5">
-              <span className="text-[11px] font-medium text-neutral-500 uppercase tracking-wider mr-1">Source</span>
+            </>
+          )}
+        </div>
+
+        <div className="w-px h-6 bg-neutral-700" />
+
+        {/* Source filter group */}
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => setSourceOpen((v) => !v)}
+            className="flex items-center gap-1 text-[11px] font-medium text-neutral-500 uppercase tracking-wider hover:text-neutral-300 transition-colors"
+          >
+            Source
+            {!sourceOpen && sourceFilter && (
+              <span className="normal-case tracking-normal text-primary-400">
+                : {sourceFilter}
+              </span>
+            )}
+            <ChevronDown className={`w-3 h-3 transition-transform ${sourceOpen ? 'rotate-180' : ''}`} />
+          </button>
+          {sourceOpen && (
+            <>
               <FilterPill active={sourceFilter === ''} onClick={() => { setSourceFilter(''); setPage(0) }}>Any</FilterPill>
               <FilterPill active={sourceFilter === 'manual'} onClick={() => { setSourceFilter('manual'); setPage(0) }}>Manual</FilterPill>
               <FilterPill active={sourceFilter === 'idx'} onClick={() => { setSourceFilter('idx'); setPage(0) }}>IDX</FilterPill>
-              {sourceFilter && (
-                <button type="button" onClick={() => { setSourceFilter(''); setPage(0) }} className="text-[11px] text-neutral-500 hover:text-primary-400 transition-colors ml-1">Clear</button>
-              )}
+            </>
+          )}
+        </div>
+
+        {/* Clear all */}
+        {(statusFilter || sourceFilter) && (
+          <>
+            <div className="w-px h-6 bg-neutral-700" />
+            <button
+              type="button"
+              onClick={() => { setStatusFilter(''); setSourceFilter(''); setPage(0) }}
+              className="text-[11px] text-neutral-500 hover:text-primary-400 transition-colors"
+            >
+              Clear all
+            </button>
+          </>
+        )}
+
+      </div>
+
+      {/* Mobile: stacked search + collapsible filters */}
+      <div className="md:hidden shrink-0">
+        <div className="relative mb-3">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+          <input
+            type="text"
+            placeholder="Search listings..."
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(0) }}
+            className="w-full pl-10 pr-4 py-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+          />
+        </div>
+        <div className="mb-5">
+          <button
+            type="button"
+            onClick={() => setFiltersOpen((v) => !v)}
+            className="flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors"
+          >
+            <SlidersHorizontal className="w-3.5 h-3.5" />
+            <span>Filters</span>
+            {(statusFilter || sourceFilter) && (
+              <span className="w-4.5 h-4.5 bg-primary-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">
+                {(statusFilter ? 1 : 0) + (sourceFilter ? 1 : 0)}
+              </span>
+            )}
+            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${filtersOpen ? 'rotate-180' : ''}`} />
+          </button>
+          <div className={`overflow-hidden transition-all ${filtersOpen ? 'max-h-48 opacity-100 mt-3' : 'max-h-0 opacity-0'}`}>
+            <div className="space-y-2.5">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="text-[11px] font-medium text-neutral-500 uppercase tracking-wider mr-1">Status</span>
+                <FilterPill active={statusFilter === ''} onClick={() => { setStatusFilter(''); setPage(0) }}>All</FilterPill>
+                <FilterPill active={statusFilter === 'active'} onClick={() => { setStatusFilter('active'); setPage(0) }}>Active</FilterPill>
+                <FilterPill active={statusFilter === 'pending'} onClick={() => { setStatusFilter('pending'); setPage(0) }}>Pending</FilterPill>
+                <FilterPill active={statusFilter === 'sold'} onClick={() => { setStatusFilter('sold'); setPage(0) }}>Sold</FilterPill>
+                <FilterPill active={statusFilter === 'off_market'} onClick={() => { setStatusFilter('off_market'); setPage(0) }}>Off Market</FilterPill>
+                {statusFilter && (
+                  <button type="button" onClick={() => { setStatusFilter(''); setPage(0) }} className="text-[11px] text-neutral-500 hover:text-primary-400 transition-colors ml-1">Clear</button>
+                )}
+              </div>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="text-[11px] font-medium text-neutral-500 uppercase tracking-wider mr-1">Source</span>
+                <FilterPill active={sourceFilter === ''} onClick={() => { setSourceFilter(''); setPage(0) }}>Any</FilterPill>
+                <FilterPill active={sourceFilter === 'manual'} onClick={() => { setSourceFilter('manual'); setPage(0) }}>Manual</FilterPill>
+                <FilterPill active={sourceFilter === 'idx'} onClick={() => { setSourceFilter('idx'); setPage(0) }}>IDX</FilterPill>
+                {sourceFilter && (
+                  <button type="button" onClick={() => { setSourceFilter(''); setPage(0) }} className="text-[11px] text-neutral-500 hover:text-primary-400 transition-colors ml-1">Clear</button>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -244,7 +333,8 @@ export default function DashboardListingsPage() {
         </div>
       )}
 
-      {/* Listings table */}
+      {/* Content area */}
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain" onWheel={(e) => e.stopPropagation()}>
       {isLoading ? (
         <div className="text-center text-neutral-400 py-12">Loading listings...</div>
       ) : !paginated?.length ? (
@@ -434,6 +524,7 @@ export default function DashboardListingsPage() {
           )}
         </>
       )}
+      </div>
     </div>
   )
 }

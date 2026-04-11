@@ -1,32 +1,32 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200" fill="none">
-  <!-- Main hill ridge -->
+  <!-- Primary ridge — left peak higher, crosses over secondary near center -->
   <path
-    d="M0 140 C60 138, 100 130, 160 110 C200 96, 240 78, 300 72 C340 68, 360 80, 390 90 C420 100, 440 95, 470 82 C510 66, 540 55, 580 58 C620 62, 650 78, 690 95 C720 106, 760 118, 800 125"
-    stroke="#FBBF24" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"
+    d="M0 155 C30 152, 70 142, 120 124 C160 110, 200 90, 260 74 C300 64, 330 60, 360 66 C385 72, 400 84, 420 92 C445 84, 465 72, 500 66 C535 60, 560 64, 600 76 C650 94, 700 118, 750 138 C775 146, 800 152, 800 152"
+    stroke="#C4A96E" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"
   />
-  <!-- Secondary ridge line (slightly below, offset) -->
+  <!-- Secondary ridge — slightly offset, weaves with primary -->
   <path
-    d="M30 148 C80 144, 130 132, 180 118 C220 106, 260 90, 310 82 C350 76, 380 88, 410 96 C440 104, 465 98, 500 86 C540 72, 570 64, 610 68 C650 74, 680 86, 720 100 C750 110, 780 120, 800 130"
-    stroke="#D4A017" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"
+    d="M20 160 C60 156, 100 148, 150 132 C190 120, 230 102, 280 86 C315 76, 345 72, 375 78 C400 84, 415 94, 435 100 C455 94, 475 84, 505 78 C535 72, 565 76, 600 86 C650 104, 690 120, 730 134 C760 144, 790 152, 800 155"
+    stroke="#B08D4A" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"
   />
-  <!-- Lower accent line left -->
+  <!-- Lower accent line left — tapers out -->
   <path
-    d="M80 158 C120 154, 170 146, 220 138 C270 130, 310 126, 360 128 C390 130, 410 134, 430 138"
-    stroke="#B8860B" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"
+    d="M80 168 C110 164, 150 158, 200 150 C240 144, 270 140, 310 138 C340 137, 360 140, 380 144"
+    stroke="#96733A" stroke-width="3" stroke-linecap="round"
   />
-  <!-- Lower accent line right -->
+  <!-- Lower accent line right — tapers out -->
   <path
-    d="M460 132 C500 126, 540 120, 580 118 C620 116, 660 120, 710 130 C740 136, 770 142, 800 146"
-    stroke="#B8860B" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"
+    d="M420 144 C440 140, 460 137, 490 138 C530 140, 560 144, 600 150 C650 158, 690 164, 720 168"
+    stroke="#96733A" stroke-width="3" stroke-linecap="round"
   />
   <!-- Ground wisp left -->
   <path
-    d="M140 166 C180 162, 230 156, 290 154 C320 153, 340 155, 350 158"
-    stroke="#9A7B0A" stroke-width="5" stroke-linecap="round"
+    d="M140 176 C170 173, 210 168, 260 164 C290 162, 310 163, 330 166"
+    stroke="#7A5C30" stroke-width="2" stroke-linecap="round"
   />
   <!-- Ground wisp right -->
   <path
-    d="M500 152 C540 148, 590 144, 640 143 C670 143, 700 146, 720 150"
-    stroke="#9A7B0A" stroke-width="5" stroke-linecap="round"
+    d="M470 166 C490 163, 510 162, 540 164 C590 168, 630 173, 660 176"
+    stroke="#7A5C30" stroke-width="2" stroke-linecap="round"
   />
 </svg>

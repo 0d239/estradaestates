@@ -20,6 +20,8 @@ import {
   ArrowLeft,
   CheckCircle,
   Loader2,
+  List,
+  Map as MapIcon,
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState, useActionState } from 'react';
 import Link from 'next/link';
@@ -28,6 +30,9 @@ import { Badge } from '@/components/ui/Badge';
 import { supabase } from '@/lib/supabase';
 import type { Listing, ListingStatus } from '@/lib/database.types';
 import { submitListingInquiry } from './actions';
+import { ListingsMap } from '@/components/ListingsMap';
+
+type ViewMode = 'grid' | 'map';
 
 // --- Filter chip primitive ---
 
@@ -56,30 +61,6 @@ function Chip({
     >
       {children}
     </button>
-  );
-}
-
-// --- Filter group (vertical) ---
-
-function FilterGroup({
-  label,
-  icon: Icon,
-  children,
-}: {
-  label: string;
-  icon: React.ElementType;
-  children: React.ReactNode;
-}) {
-  return (
-    <div>
-      <div className="flex items-center gap-1.5 text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">
-        <Icon className="w-3.5 h-3.5" />
-        {label}
-      </div>
-      <div className="flex flex-wrap gap-1.5">
-        {children}
-      </div>
-    </div>
   );
 }
 
@@ -126,6 +107,7 @@ export default function ListingsPage() {
   const [bedroomFilters, setBedroomFilters] = useState<Set<number>>(new Set());
   const [priceRanges, setPriceRanges] = useState<Set<number>>(new Set());
   const [sort, setSort] = useState<SortKey>('newest');
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
 
   const toggleInSet = <T,>(setter: React.Dispatch<React.SetStateAction<Set<T>>>, value: T) => {
     setter((prev) => {
@@ -242,116 +224,94 @@ export default function ListingsPage() {
           <h1 className="text-4xl font-bold text-white">Property Listings</h1>
         </div>
 
-        <div className="flex gap-8">
-          {/* Sidebar filters — always visible on lg+, toggleable on mobile */}
-          {/* Mobile modal filters */}
-          <MobileFilters
-            open={showFilters}
-            onClose={() => setShowFilters(false)}
-            activeFilterCount={activeFilterCount}
-            onClear={clearAll}
-            resultCount={filtered?.length ?? 0}
-            statusFilters={statusFilters} toggleStatus={(v) => toggleInSet(setStatusFilters, v)} clearStatuses={() => setStatusFilters(new Set())}
-            cityFilters={cityFilters} toggleCity={(v) => toggleInSet(setCityFilters, v)} clearCities={() => setCityFilters(new Set())}
-            cities={cities}
-            bedroomFilters={bedroomFilters} toggleBedroom={(v) => toggleInSet(setBedroomFilters, v)} clearBedrooms={() => setBedroomFilters(new Set())}
-            priceRanges={priceRanges} togglePriceRange={(v) => toggleInSet(setPriceRanges, v)} clearPriceRanges={() => setPriceRanges(new Set())}
-            sort={sort} setSort={setSort}
-          />
+        {/* Mobile modal filters */}
+        <MobileFilters
+          open={showFilters}
+          onClose={() => setShowFilters(false)}
+          activeFilterCount={activeFilterCount}
+          onClear={clearAll}
+          resultCount={filtered?.length ?? 0}
+          statusFilters={statusFilters} toggleStatus={(v) => toggleInSet(setStatusFilters, v)} clearStatuses={() => setStatusFilters(new Set())}
+          cityFilters={cityFilters} toggleCity={(v) => toggleInSet(setCityFilters, v)} clearCities={() => setCityFilters(new Set())}
+          cities={cities}
+          bedroomFilters={bedroomFilters} toggleBedroom={(v) => toggleInSet(setBedroomFilters, v)} clearBedrooms={() => setBedroomFilters(new Set())}
+          priceRanges={priceRanges} togglePriceRange={(v) => toggleInSet(setPriceRanges, v)} clearPriceRanges={() => setPriceRanges(new Set())}
+          sort={sort} setSort={setSort}
+        />
 
-          {/* Desktop sidebar filters */}
-          <aside className="hidden lg:block w-72 shrink-0">
-            <div className="bg-neutral-800 border border-neutral-700 rounded-2xl p-5 sticky top-20">
-              <div className="flex items-center justify-between mb-5">
-                <h2 className="text-sm font-semibold text-white flex items-center gap-2">
-                  <SlidersHorizontal className="w-4 h-4" />
-                  Filters
-                </h2>
-                {activeFilterCount > 0 && (
-                  <button
-                    type="button"
-                    onClick={clearAll}
-                    className="text-xs text-neutral-500 hover:text-primary-400 transition-colors"
-                  >
-                    Clear all
-                  </button>
-                )}
-              </div>
-              <div className="space-y-5">
-                <FilterContent
-                  statusFilters={statusFilters} toggleStatus={(v) => toggleInSet(setStatusFilters, v)} clearStatuses={() => setStatusFilters(new Set())}
-                  cityFilters={cityFilters} toggleCity={(v) => toggleInSet(setCityFilters, v)} clearCities={() => setCityFilters(new Set())}
-                  cities={cities}
-                  bedroomFilters={bedroomFilters} toggleBedroom={(v) => toggleInSet(setBedroomFilters, v)} clearBedrooms={() => setBedroomFilters(new Set())}
-                  priceRanges={priceRanges} togglePriceRange={(v) => toggleInSet(setPriceRanges, v)} clearPriceRanges={() => setPriceRanges(new Set())}
-                  sort={sort} setSort={setSort}
-                />
-              </div>
-            </div>
-          </aside>
+        {/* Desktop: horizontal filter bar */}
+        <DesktopFilterBar
+          statusFilters={statusFilters} toggleStatus={(v) => toggleInSet(setStatusFilters, v)} clearStatuses={() => setStatusFilters(new Set())}
+          cityFilters={cityFilters} toggleCity={(v) => toggleInSet(setCityFilters, v)} clearCities={() => setCityFilters(new Set())}
+          cities={cities}
+          bedroomFilters={bedroomFilters} toggleBedroom={(v) => toggleInSet(setBedroomFilters, v)} clearBedrooms={() => setBedroomFilters(new Set())}
+          priceRanges={priceRanges} togglePriceRange={(v) => toggleInSet(setPriceRanges, v)} clearPriceRanges={() => setPriceRanges(new Set())}
+          sort={sort} setSort={setSort}
+          activeFilterCount={activeFilterCount}
+          onClear={clearAll}
+          resultCount={filtered?.length ?? 0}
+          isLoading={isLoading}
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+        />
 
-          {/* Main content */}
-          <div className="flex-1 min-w-0">
-            {/* Mobile filter button + results count */}
-            <div className="flex items-center justify-center lg:justify-between mb-6">
-              <button
-                type="button"
-                onClick={openFilters}
-                className="lg:hidden relative w-11 h-11 rounded-full bg-primary-600 text-white shadow-md shadow-primary-600/30 flex items-center justify-center active:scale-95 transition-transform"
-              >
-                <SlidersHorizontal className="w-4.5 h-4.5" />
-                {activeFilterCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-white text-primary-700 text-xs font-bold rounded-full flex items-center justify-center">
-                    {activeFilterCount}
-                  </span>
-                )}
-              </button>
-
-              {!isLoading && filtered && (
-                <div className="hidden lg:flex items-center gap-2 text-sm text-neutral-500">
-                  <span>
-                    {filtered.length} {filtered.length === 1 ? 'property' : 'properties'}
-                    {activeFilterCount > 0 && ' matching'}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* Listings grid */}
-            {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="bg-neutral-800 border border-neutral-700 rounded-xl overflow-hidden animate-pulse">
-                    <div className="aspect-[4/3] bg-neutral-800" />
-                    <div className="p-4 space-y-3">
-                      <div className="h-5 bg-neutral-800 rounded w-1/2" />
-                      <div className="h-4 bg-neutral-800 rounded w-3/4" />
-                      <div className="h-3 bg-neutral-800 rounded w-2/3" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : !filtered?.length ? (
-              <div className="text-center py-20">
-                <Building2 className="w-12 h-12 text-neutral-700 mx-auto mb-4" />
-                <p className="text-neutral-400 text-lg mb-2">No properties found</p>
-                <p className="text-neutral-500 text-sm mb-6">Try adjusting your filters to see more results.</p>
-                <button
-                  type="button"
-                  onClick={clearAll}
-                  className="px-5 py-2.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 rounded-full text-sm font-medium transition-colors"
-                >
-                  Reset all filters
-                </button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {filtered.map((listing) => (
-                  <ListingCard key={listing.id} listing={listing} />
-                ))}
-              </div>
+        {/* Mobile filter button */}
+        <div className="flex items-center justify-center lg:hidden mb-6">
+          <button
+            type="button"
+            onClick={openFilters}
+            className="relative w-11 h-11 rounded-full bg-primary-600 text-white shadow-md shadow-primary-600/30 flex items-center justify-center active:scale-95 transition-transform"
+          >
+            <SlidersHorizontal className="w-4.5 h-4.5" />
+            {activeFilterCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-white text-primary-700 text-xs font-bold rounded-full flex items-center justify-center">
+                {activeFilterCount}
+              </span>
             )}
+          </button>
+        </div>
+
+        {/* Content: map (desktop only) or grid */}
+        {viewMode === 'map' ? (
+          <div className="hidden lg:block h-[700px]">
+            <ListingsMap listings={filtered ?? []} />
           </div>
+        ) : null}
+        {/* Grid view — always shown on mobile, hidden when map on desktop */}
+        <div className={viewMode === 'map' ? 'lg:hidden' : ''}>
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="bg-neutral-800 border border-neutral-700 rounded-xl overflow-hidden animate-pulse">
+                <div className="aspect-[4/3] bg-neutral-800" />
+                <div className="p-4 space-y-3">
+                  <div className="h-5 bg-neutral-800 rounded w-1/2" />
+                  <div className="h-4 bg-neutral-800 rounded w-3/4" />
+                  <div className="h-3 bg-neutral-800 rounded w-2/3" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : !filtered?.length ? (
+          <div className="text-center py-20">
+            <Building2 className="w-12 h-12 text-neutral-700 mx-auto mb-4" />
+            <p className="text-neutral-400 text-lg mb-2">No properties found</p>
+            <p className="text-neutral-500 text-sm mb-6">Try adjusting your filters to see more results.</p>
+            <button
+              type="button"
+              onClick={clearAll}
+              className="px-5 py-2.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 rounded-full text-sm font-medium transition-colors"
+            >
+              Reset all filters
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filtered.map((listing) => (
+              <ListingCard key={listing.id} listing={listing} />
+            ))}
+          </div>
+        )}
         </div>
       </section>
 
@@ -648,66 +608,181 @@ function MobileFilters({
   );
 }
 
-// --- Shared filter content (desktop sidebar) ---
+// --- Desktop horizontal filter bar ---
 
-function FilterContent({
-  statusFilters, toggleStatus, clearStatuses,
-  cityFilters, toggleCity, clearCities,
-  cities,
-  bedroomFilters, toggleBedroom, clearBedrooms,
-  priceRanges, togglePriceRange, clearPriceRanges,
-  sort, setSort,
-}: MultiFilterProps) {
+function DesktopFilterBar({
+  activeFilterCount, onClear, resultCount, isLoading,
+  viewMode, setViewMode,
+  ...filterProps
+}: MultiFilterProps & {
+  activeFilterCount: number;
+  onClear: () => void;
+  resultCount: number;
+  isLoading: boolean;
+  viewMode: ViewMode;
+  setViewMode: (v: ViewMode) => void;
+}) {
+  const [expanded, setExpanded] = useState<FilterSection | null>(null);
+  const toggle = (section: FilterSection) =>
+    setExpanded((prev) => (prev === section ? null : section));
+
   return (
-    <>
-      <FilterGroup label="Status" icon={CircleDot}>
-        <Chip active={statusFilters.size === 0} onClick={clearStatuses}>
-          <Home className="w-3.5 h-3.5" />
-          All
-        </Chip>
-        {STATUS_CONFIG.filter((s) => s.value).map(({ value, label, icon: StatusIcon }) => (
-          <Chip key={value} active={statusFilters.has(value as ListingStatus)} onClick={() => toggleStatus(value as ListingStatus)}>
-            <StatusIcon className="w-3.5 h-3.5" />
-            {label}
-          </Chip>
-        ))}
-      </FilterGroup>
+    <div className="hidden lg:block mb-6">
+      {/* Filter groups — label + clickable value pill */}
+      <div className="flex items-center gap-3 flex-wrap">
+        {FILTER_SECTIONS.map(({ key, label, icon: Icon }) => {
+          const isExpanded = expanded === key;
+          const summary = summarizeFilter(key, filterProps);
+          const hasSelection = sectionHasSelection(key, filterProps);
+          return (
+            <div key={key} className="flex items-center gap-1.5">
+              <span className="flex items-center gap-1 text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                <Icon className="w-3.5 h-3.5" />
+                {label}
+              </span>
+              <button
+                type="button"
+                onClick={() => toggle(key)}
+                className={cn(
+                  'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all',
+                  isExpanded
+                    ? 'bg-primary-600 text-white shadow-md shadow-primary-600/20'
+                    : hasSelection
+                      ? 'bg-primary-900/40 text-primary-300 ring-1 ring-primary-500/40 hover:bg-primary-900/60'
+                      : 'bg-neutral-800/80 text-primary-300/80 ring-1 ring-primary-700/50 hover:ring-primary-600/60 hover:text-primary-200'
+                )}
+              >
+                {summary}
+                <svg
+                  className={cn(
+                    'w-3 h-3 transition-transform',
+                    isExpanded && 'rotate-180'
+                  )}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
 
-      {cities.length > 0 && (
-        <FilterGroup label="City" icon={MapPin}>
-          <Chip active={cityFilters.size === 0} onClick={clearCities}>All</Chip>
-          {cities.map((city) => (
-            <Chip key={city} active={cityFilters.has(city)} onClick={() => toggleCity(city)}>
-              {city}
-            </Chip>
+              {/* Divider */}
+              <div className="w-px h-5 bg-neutral-700/50" />
+            </div>
+          );
+        })}
+
+        {activeFilterCount > 0 && (
+          <button
+            type="button"
+            onClick={onClear}
+            className="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-neutral-500 hover:text-primary-400 transition-colors"
+          >
+            <X className="w-3.5 h-3.5" />
+            Clear all
+          </button>
+        )}
+
+        {/* View toggle + count pushed right */}
+        <div className="ml-auto flex items-center gap-3">
+          {!isLoading && (
+            <span className="text-sm text-neutral-500">
+              {resultCount} {resultCount === 1 ? 'property' : 'properties'}
+              {activeFilterCount > 0 && ' matching'}
+            </span>
+          )}
+          <div className="inline-flex rounded-full bg-neutral-800 p-0.5 border border-neutral-700">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                viewMode === 'grid'
+                  ? 'bg-primary-500 text-white shadow-sm shadow-primary-500/25'
+                  : 'text-neutral-400 hover:text-neutral-200'
+              }`}
+            >
+              <List className="w-3.5 h-3.5" />
+              Grid
+            </button>
+            <button
+              onClick={() => setViewMode('map')}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                viewMode === 'map'
+                  ? 'bg-primary-500 text-white shadow-sm shadow-primary-500/25'
+                  : 'text-neutral-400 hover:text-neutral-200'
+              }`}
+            >
+              <MapIcon className="w-3.5 h-3.5" />
+              Map
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Expanded options row */}
+      {expanded && (
+        <div className="flex flex-wrap items-center gap-1.5 mt-3 pl-1">
+          {expanded === 'status' && (
+            <>
+              <Chip active={filterProps.statusFilters.size === 0} onClick={filterProps.clearStatuses}>All</Chip>
+              {STATUS_CONFIG.filter((s) => s.value).map(({ value, label, icon: StatusIcon }) => (
+                <Chip key={value} active={filterProps.statusFilters.has(value as ListingStatus)} onClick={() => filterProps.toggleStatus(value as ListingStatus)}>
+                  <StatusIcon className="w-3.5 h-3.5" />
+                  {label}
+                </Chip>
+              ))}
+            </>
+          )}
+
+          {expanded === 'city' && (
+            <>
+              <Chip active={filterProps.cityFilters.size === 0} onClick={filterProps.clearCities}>All</Chip>
+              {filterProps.cities.map((city) => (
+                <Chip key={city} active={filterProps.cityFilters.has(city)} onClick={() => filterProps.toggleCity(city)}>
+                  {city}
+                </Chip>
+              ))}
+            </>
+          )}
+
+          {expanded === 'beds' && (
+            <>
+              <Chip active={filterProps.bedroomFilters.size === 0} onClick={filterProps.clearBedrooms}>Any</Chip>
+              {BEDROOM_OPTIONS.map((n) => (
+                <Chip key={n} active={filterProps.bedroomFilters.has(n)} onClick={() => filterProps.toggleBedroom(n)}>
+                  {n === 5 ? '5+' : String(n)}
+                </Chip>
+              ))}
+            </>
+          )}
+
+          {expanded === 'price' && (
+            <>
+              <Chip active={filterProps.priceRanges.size === 0} onClick={filterProps.clearPriceRanges}>Any</Chip>
+              {PRICE_RANGES.map((range, i) => (
+                <Chip key={range.label} active={filterProps.priceRanges.has(i)} onClick={() => filterProps.togglePriceRange(i)}>
+                  {range.label}
+                </Chip>
+              ))}
+            </>
+          )}
+
+          {expanded === 'sort' && SORT_OPTIONS.map(({ key, label }) => (
+            <Chip key={key} active={filterProps.sort === key} onClick={() => filterProps.setSort(key)}>{label}</Chip>
           ))}
-        </FilterGroup>
+
+          {sectionHasSelection(expanded, filterProps) && sectionClear(expanded, filterProps) && (
+            <button
+              type="button"
+              onClick={sectionClear(expanded, filterProps)}
+              className="text-xs text-neutral-500 hover:text-primary-400 transition-colors ml-2"
+            >
+              Clear
+            </button>
+          )}
+        </div>
       )}
-
-      <FilterGroup label="Beds" icon={Bed}>
-        <Chip active={bedroomFilters.size === 0} onClick={clearBedrooms}>Any</Chip>
-        {BEDROOM_OPTIONS.map((n) => (
-          <Chip key={n} active={bedroomFilters.has(n)} onClick={() => toggleBedroom(n)}>
-            {n === 5 ? '5+' : String(n)}
-          </Chip>
-        ))}
-      </FilterGroup>
-
-      <FilterGroup label="Price" icon={DollarSign}>
-        <Chip active={priceRanges.size === 0} onClick={clearPriceRanges}>Any</Chip>
-        {PRICE_RANGES.map((range, i) => (
-          <Chip key={range.label} active={priceRanges.has(i)} onClick={() => togglePriceRange(i)}>
-            {range.label}
-          </Chip>
-        ))}
-      </FilterGroup>
-
-      <FilterGroup label="Sort" icon={ArrowUpDown}>
-        {SORT_OPTIONS.map(({ key, label }) => (
-          <Chip key={key} active={sort === key} onClick={() => setSort(key)}>{label}</Chip>
-        ))}
-      </FilterGroup>
-    </>
+    </div>
   );
 }
 

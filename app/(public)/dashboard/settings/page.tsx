@@ -53,8 +53,9 @@ export default function SettingsPage() {
         description={`Manage your account${profile ? `, ${profile.name.split(' ')[0]}` : ''}.`}
       />
 
-      <div className="max-w-md">
-        <div className="bg-neutral-800/40 border border-neutral-700/50 rounded-2xl p-7">
+      <div className="max-w-2xl space-y-6">
+        {/* Change Password */}
+        <section className="bg-neutral-800/40 border border-neutral-700/50 rounded-2xl p-7">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 rounded-xl bg-primary-500/10 flex items-center justify-center">
               <Lock className="w-5 h-5 text-primary-400" />
@@ -65,7 +66,7 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          <form onSubmit={handleChangePassword} className="space-y-5">
+          <form onSubmit={handleChangePassword} className="space-y-5 max-w-md">
             <div>
               <label htmlFor="new-password" className="block text-sm font-medium text-neutral-300 mb-1.5">
                 New Password
@@ -112,7 +113,7 @@ export default function SettingsPage() {
               {loading ? 'Updating...' : 'Update Password'}
             </button>
           </form>
-        </div>
+        </section>
       </div>
     </div>
   )
