@@ -45,8 +45,13 @@ export default async function CardPage({
   return (
     <main className="min-h-dvh bg-black text-neutral-200 flex items-center justify-center px-6 py-16">
       <article className="w-full max-w-sm">
-        <p className="text-primary-400 text-[11px] tracking-[0.35em] uppercase">
-          {companyInfo.name}
+        <p className="text-primary-400 text-[11px] tracking-[0.35em] uppercase grid">
+          <span className="col-start-1 row-start-1 animate-logo-a">
+            {companyInfo.name}
+          </span>
+          <span aria-hidden="true" className="col-start-1 row-start-1 animate-logo-b">
+            {companyInfo.legalName}
+          </span>
         </p>
 
         <h1 className="font-display mt-8 text-5xl leading-[0.95] text-white">
