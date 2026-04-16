@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { team, companyInfo } from '@/data/agents'
 
@@ -95,10 +96,23 @@ export default async function CardPage({
               Office
             </span>
             <span className="text-white normal-case text-right">
-              {companyInfo.city}, {companyInfo.state}
+              {slug === 'laura-velasco' ? 'Southern California' : `${companyInfo.city}, ${companyInfo.state}`}
             </span>
           </div>
         </div>
+
+        <Link
+          href="/"
+          className="group mt-8 flex items-center justify-between py-4 border-b border-neutral-800"
+        >
+          <span className="text-neutral-500 text-[10px] uppercase tracking-[0.25em]">
+            Visit
+          </span>
+          <span className="text-white group-hover:text-primary-300 group-active:text-primary-300 transition normal-case inline-flex items-center gap-2">
+            estradaestates.com
+            <span aria-hidden className="text-primary-400">→</span>
+          </span>
+        </Link>
 
         <p className="mt-10 text-[10px] leading-relaxed text-neutral-600 normal-case">
           {companyInfo.legalNote}
