@@ -65,7 +65,7 @@ function ListingCard({ listing, fading }: { listing: Listing; fading: boolean })
           </div>
         )}
         <div className="absolute top-3 left-3">
-          <span className="px-2.5 py-1 bg-primary-600/90 text-white text-xs font-semibold rounded-full capitalize">
+          <span className="px-2.5 py-1 bg-primary-500/90 text-white text-xs font-semibold rounded-full capitalize">
             {listing.status}
           </span>
         </div>
@@ -234,10 +234,10 @@ export function FeaturedListings() {
           </button>
         )}
 
-        <div className="relative h-7 overflow-hidden">
+        <div className="relative h-9 overflow-hidden">
           <span
             className={cn(
-              'inline-flex items-center px-4 py-1 rounded-full text-sm font-semibold bg-primary-600 text-white transition-all duration-300',
+              'inline-flex items-center px-5 py-1.5 rounded-full text-base font-semibold bg-primary-500 text-white transition-all duration-300',
               catFading
                 ? 'opacity-0 translate-y-2'
                 : 'opacity-100 translate-y-0',

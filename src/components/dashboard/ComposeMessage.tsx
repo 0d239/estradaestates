@@ -224,7 +224,7 @@ export function ComposeMessage({ onClose }: ComposeMessageProps) {
                     <div
                       className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${
                         selectedIds.has(contact.id)
-                          ? 'bg-primary-600 border-primary-600'
+                          ? 'bg-primary-500 border-primary-500'
                           : 'border-neutral-600'
                       }`}
                     >

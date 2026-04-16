@@ -163,7 +163,7 @@ export default function ListingDetailPage() {
                   {listing.zip && ` ${listing.zip}`}
                 </p>
               </div>
-              <span className="px-3 py-1 bg-primary-600/90 text-white text-sm font-semibold rounded-full capitalize shrink-0">
+              <span className="px-3 py-1 bg-primary-500/90 text-white text-sm font-semibold rounded-full capitalize shrink-0">
                 {listing.status}
               </span>
             </div>
@@ -265,7 +265,7 @@ function MoreListings({ allListings, currentId }: { allListings?: Pick<Listing, 
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="mx-auto flex items-center gap-2 px-5 py-2.5 rounded-full border border-primary-600 text-primary-400 hover:bg-primary-600/10 transition-colors text-sm font-medium"
+        className="mx-auto flex items-center gap-2 px-5 py-2.5 rounded-full border border-primary-500 text-primary-400 hover:bg-primary-500/10 transition-colors text-sm font-medium"
       >
         <span className={`transition-transform duration-200 ${open ? 'rotate-45' : ''}`}>
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="stroke-current">
@@ -390,7 +390,7 @@ function SidebarInquiryForm({ listing }: { listing: Listing }) {
       <button
         type="submit"
         disabled={isPending}
-        className="w-full py-2.5 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+        className="w-full py-2.5 bg-primary-500 text-white text-sm font-medium rounded-lg hover:bg-primary-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
       >
         {isPending ? (
           <>

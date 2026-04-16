@@ -83,7 +83,7 @@ function DesignServiceTabs() {
               className={cn(
                 'flex-1 flex items-center justify-center py-2.5 rounded-lg transition-colors',
                 isActive
-                  ? 'bg-primary-600 text-white'
+                  ? 'bg-primary-500 text-white'
                   : 'text-neutral-500 hover:text-neutral-300',
               )}
             >

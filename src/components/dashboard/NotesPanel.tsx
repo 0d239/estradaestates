@@ -155,7 +155,7 @@ export default function NotesPanel({ listingId, contactId }: NotesPanelProps) {
                 type="button"
                 onClick={() => createNote.mutate({ content: newContent, is_public: newPublic })}
                 disabled={!newContent.trim() || createNote.isPending}
-                className="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium bg-primary-600 text-white rounded-lg hover:bg-primary-500 disabled:opacity-50 transition-colors"
+                className="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium bg-primary-500 text-white rounded-lg hover:bg-primary-400 disabled:opacity-50 transition-colors"
               >
                 <Save className="w-3 h-3" /> Save
               </button>
@@ -212,7 +212,7 @@ export default function NotesPanel({ listingId, contactId }: NotesPanelProps) {
                           type="button"
                           onClick={() => updateNote.mutate({ id: note.id, content: editContent, is_public: editPublic })}
                           disabled={!editContent.trim() || updateNote.isPending}
-                          className="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium bg-primary-600 text-white rounded-lg hover:bg-primary-500 disabled:opacity-50 transition-colors"
+                          className="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium bg-primary-500 text-white rounded-lg hover:bg-primary-400 disabled:opacity-50 transition-colors"
                         >
                           <Save className="w-3 h-3" /> Save
                         </button>

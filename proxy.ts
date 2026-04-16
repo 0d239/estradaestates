@@ -1,7 +1,19 @@
-import { type NextRequest } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 
+const CARD_HOSTS: Record<string, string> = {
+  'sophia.estradaestates.com': 'sophia-estrada',
+  'henry.estradaestates.com': 'henry-estrada',
+}
+
 export async function proxy(request: NextRequest) {
+  const host = (request.headers.get('host') ?? '').toLowerCase()
+  const slug = CARD_HOSTS[host]
+  if (slug) {
+    const url = request.nextUrl.clone()
+    url.pathname = `/card/${slug}`
+    return NextResponse.rewrite(url)
+  }
   return await updateSession(request)
 }
 

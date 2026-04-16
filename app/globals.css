@@ -34,6 +34,7 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
+    text-transform: uppercase;
   }
 }
 
@@ -66,6 +67,26 @@
 
 .logo-glow {
   animation: glow-pulse 8s ease-in-out infinite;
+}
+
+@keyframes logo-fade-a {
+  0%, 30% { opacity: 1; }
+  50%, 80% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes logo-fade-b {
+  0%, 30% { opacity: 0; }
+  50%, 80% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.animate-logo-a {
+  animation: logo-fade-a 20s ease-in-out infinite;
+}
+
+.animate-logo-b {
+  animation: logo-fade-b 20s ease-in-out infinite;
 }
 
 @keyframes avatar-glow-pulse {

@@ -54,7 +54,7 @@ function Chip({
       className={cn(
         'inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all',
         active
-          ? 'bg-primary-600 text-white shadow-md shadow-primary-600/20'
+          ? 'bg-primary-500 text-white shadow-md shadow-primary-500/20'
           : 'bg-neutral-800/80 text-neutral-400 hover:bg-neutral-700/80 hover:text-neutral-200',
         className
       )}
@@ -260,7 +260,7 @@ export default function ListingsPage() {
           <button
             type="button"
             onClick={openFilters}
-            className="relative w-11 h-11 rounded-full bg-primary-600 text-white shadow-md shadow-primary-600/30 flex items-center justify-center active:scale-95 transition-transform"
+            className="relative w-11 h-11 rounded-full bg-primary-500 text-white shadow-md shadow-primary-500/30 flex items-center justify-center active:scale-95 transition-transform"
           >
             <SlidersHorizontal className="w-4.5 h-4.5" />
             {activeFilterCount > 0 && (
@@ -599,7 +599,7 @@ function MobileFilters({
         <button
           type="button"
           onClick={onClose}
-          className="w-full mt-5 py-3 rounded-xl bg-primary-600 text-white text-sm font-medium hover:bg-primary-500 active:scale-[0.98] transition-all"
+          className="w-full mt-5 py-3 rounded-xl bg-primary-500 text-white text-sm font-medium hover:bg-primary-400 active:scale-[0.98] transition-all"
         >
           Show {resultCount} {resultCount === 1 ? 'property' : 'properties'}
         </button>
@@ -646,10 +646,10 @@ function DesktopFilterBar({
                 className={cn(
                   'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all',
                   isExpanded
-                    ? 'bg-primary-600 text-white shadow-md shadow-primary-600/20'
+                    ? 'bg-primary-500 text-white shadow-md shadow-primary-500/20'
                     : hasSelection
                       ? 'bg-primary-900/40 text-primary-300 ring-1 ring-primary-500/40 hover:bg-primary-900/60'
-                      : 'bg-neutral-800/80 text-primary-300/80 ring-1 ring-primary-700/50 hover:ring-primary-600/60 hover:text-primary-200'
+                      : 'bg-neutral-800/80 text-primary-300/80 ring-1 ring-primary-700/50 hover:ring-primary-500/60 hover:text-primary-200'
                 )}
               >
                 {summary}
@@ -813,7 +813,7 @@ function ListingCard({ listing }: { listing: Listing }) {
                 </div>
               )}
               <div className="absolute top-3 left-3">
-                <span className="px-2.5 py-1 bg-primary-600/90 text-white text-xs font-semibold rounded-full capitalize">
+                <span className="px-2.5 py-1 bg-primary-500/90 text-white text-xs font-semibold rounded-full capitalize">
                   {listing.status}
                 </span>
               </div>
@@ -841,7 +841,7 @@ function ListingCard({ listing }: { listing: Listing }) {
                 <button
                   type="button"
                   onClick={(e) => { e.preventDefault(); setShowInquiry(true); }}
-                  className="shrink-0 px-3 py-1.5 bg-neutral-700/80 text-neutral-300 text-xs font-medium rounded-full flex items-center gap-1.5 hover:bg-primary-600 hover:text-white transition-colors"
+                  className="shrink-0 px-3 py-1.5 bg-neutral-700/80 text-neutral-300 text-xs font-medium rounded-full flex items-center gap-1.5 hover:bg-primary-500 hover:text-white transition-colors"
                 >
                   <MessageCircle className="w-3.5 h-3.5" />
                   Inquire
@@ -988,7 +988,7 @@ function InquiryForm({ listing, onBack }: { listing: Listing; onBack: () => void
         <button
           type="submit"
           disabled={isPending}
-          className="mt-auto w-full py-2.5 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+          className="mt-auto w-full py-2.5 bg-primary-500 text-white text-sm font-medium rounded-lg hover:bg-primary-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
         >
           {isPending ? (
             <>

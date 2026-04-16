@@ -315,7 +315,7 @@ export function ListingsMap({ listings }: { listings: Listing[] }) {
                   <div
                     className={`w-2 h-2 rounded-sm border transition-all duration-200 ${
                       isActive
-                        ? 'bg-primary-600/60 border-primary-500'
+                        ? 'bg-primary-500/60 border-primary-500'
                         : 'border-neutral-600 bg-transparent'
                     }`}
                   />

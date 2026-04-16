@@ -251,7 +251,7 @@ export default function DashboardNotesPage() {
           <FilterPill active={targetFilter === 'assigned_to_me'} onClick={() => setTargetFilter('assigned_to_me')}>
             <UserCheck className="w-3 h-3" /> Assigned to me
             {assignedToMeCount > 0 && (
-              <span className="ml-0.5 w-4 h-4 bg-primary-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">
+              <span className="ml-0.5 w-4 h-4 bg-primary-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">
                 {assignedToMeCount}
               </span>
             )}
@@ -377,7 +377,7 @@ export default function DashboardNotesPage() {
               type="button"
               onClick={() => createNote.mutate()}
               disabled={!newContent.trim() || (newTargetType !== 'general' && !newTargetId) || createNote.isPending}
-              className="inline-flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium bg-primary-600 text-white rounded-lg hover:bg-primary-500 disabled:opacity-50 transition-colors"
+              className="inline-flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium bg-primary-500 text-white rounded-lg hover:bg-primary-400 disabled:opacity-50 transition-colors"
             >
               <Save className="w-3.5 h-3.5" /> Save
             </button>
@@ -544,7 +544,7 @@ function NoteCard({
             type="button"
             onClick={onSaveEdit}
             disabled={!editContent.trim() || isPending}
-            className="inline-flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium bg-primary-600 text-white rounded-lg hover:bg-primary-500 disabled:opacity-50 transition-colors"
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium bg-primary-500 text-white rounded-lg hover:bg-primary-400 disabled:opacity-50 transition-colors"
           >
             <Save className="w-3.5 h-3.5" /> Save
           </button>

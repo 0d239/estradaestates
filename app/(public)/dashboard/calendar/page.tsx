@@ -10,7 +10,7 @@ const EMBED_BASE = 'https://calendar.google.com/calendar/embed'
 const EMBED_PARAMS = new URLSearchParams({
   // Background & chrome
   bgcolor: '0a0a0a',      // near-black to blend with bg-black
-  color: 'D97706',        // primary-600 gold for event accents
+  color: 'B08D4A',        // primary-500 gold for event accents
   // UI options
   showTitle: '0',
   showNav: '1',
@@ -90,7 +90,7 @@ export default function CalendarPage() {
             />
             <button
               type="submit"
-              className="rounded-lg bg-primary-600 hover:bg-primary-500 text-white px-5 py-2.5 text-sm font-medium transition-colors"
+              className="rounded-lg bg-primary-500 hover:bg-primary-400 text-white px-5 py-2.5 text-sm font-medium transition-colors"
             >
               Connect
             </button>

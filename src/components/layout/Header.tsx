@@ -85,12 +85,12 @@ export function Header() {
 
           {/* Desktop: logo on the left */}
           <Link href={logoHref} className="hidden md:flex items-center gap-2.5">
-            <img src="/hills_high_res gold.png" alt="Estrada Estates" className="h-32 w-auto scale-150 object-contain logo-glow" />
+            <AlternatingLogo />
           </Link>
 
           {/* Mobile: centered logo */}
-          <Link href={logoHref} className="md:hidden absolute left-1/2 -translate-x-1/2">
-            <img src="/hills_high_res gold.png" alt="Estrada Estates" className="h-32 w-auto scale-150 object-contain logo-glow" />
+          <Link href={logoHref} className="md:hidden absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+            <AlternatingLogo />
           </Link>
 
           {/* Desktop nav */}
@@ -204,6 +204,24 @@ export function Header() {
     </header>
 
     </>
+  )
+}
+
+function AlternatingLogo() {
+  return (
+    <div className="relative h-32 scale-150 flex items-center justify-center logo-glow">
+      <img
+        src="/ee_gold.png"
+        alt="Estrada Estates"
+        className="h-full w-auto object-contain animate-logo-a translate-y-2"
+      />
+      <img
+        src="/hr_gold.png"
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 m-auto h-full w-auto object-contain animate-logo-b translate-y-2"
+      />
+    </div>
   )
 }
 

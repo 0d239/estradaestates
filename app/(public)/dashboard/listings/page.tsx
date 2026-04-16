@@ -256,7 +256,7 @@ export default function DashboardListingsPage() {
             <SlidersHorizontal className="w-3.5 h-3.5" />
             <span>Filters</span>
             {(statusFilter || sourceFilter) && (
-              <span className="w-4.5 h-4.5 bg-primary-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">
+              <span className="w-4.5 h-4.5 bg-primary-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">
                 {(statusFilter ? 1 : 0) + (sourceFilter ? 1 : 0)}
               </span>
             )}
