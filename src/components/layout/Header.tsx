@@ -89,8 +89,10 @@ export function Header() {
           </Link>
 
           {/* Mobile: centered logo */}
-          <Link href={logoHref} className="md:hidden absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-            <AlternatingLogo />
+          <Link href={logoHref} className="md:hidden absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-16 w-32 flex items-center justify-center">
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+              <AlternatingLogo />
+            </div>
           </Link>
 
           {/* Desktop nav */}
