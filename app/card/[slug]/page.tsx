@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { team, companyInfo } from '@/data/agents'
 
@@ -101,8 +100,8 @@ export default async function CardPage({
           </div>
         </div>
 
-        <Link
-          href="/"
+        <a
+          href="https://estradaestates.com"
           className="group mt-8 flex items-center justify-between py-4 border-b border-neutral-800"
         >
           <span className="text-neutral-500 text-[10px] uppercase tracking-[0.25em]">
@@ -112,7 +111,7 @@ export default async function CardPage({
             estradaestates.com
             <span aria-hidden className="text-primary-400">→</span>
           </span>
-        </Link>
+        </a>
 
         <p className="mt-10 text-[10px] leading-relaxed text-neutral-600 normal-case">
           {companyInfo.legalNote}
