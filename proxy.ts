@@ -4,6 +4,7 @@ import { updateSession } from '@/lib/supabase/middleware'
 const CARD_HOSTS: Record<string, string> = {
   'sophia.estradaestates.com': 'sophia-estrada',
   'henry.estradaestates.com': 'henry-estrada',
+  'laura.estradaestates.com': 'laura-velasco',
 }
 
 export async function proxy(request: NextRequest) {

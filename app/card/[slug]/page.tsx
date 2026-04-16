@@ -5,6 +5,7 @@ import { team, companyInfo } from '@/data/agents'
 const DISPLAY: Record<string, { first: string; last: string }> = {
   'henry-estrada': { first: 'Henry', last: 'Estrada' },
   'sophia-estrada': { first: 'Sophia', last: 'Estrada' },
+  'laura-velasco': { first: 'Laura', last: 'Velasco' },
 }
 
 export const dynamic = 'force-static'
@@ -63,17 +64,19 @@ export default async function CardPage({
         <div className="mt-10 h-px bg-gradient-to-r from-primary-500/70 via-primary-500/20 to-transparent" />
 
         <div className="mt-6">
-          <a
-            href={telHref}
-            className="group flex items-baseline justify-between py-4 border-b border-neutral-800"
-          >
-            <span className="text-neutral-500 text-[10px] uppercase tracking-[0.25em]">
-              Call
-            </span>
-            <span className="text-white group-hover:text-primary-300 group-active:text-primary-300 transition normal-case">
-              {person.phone}
-            </span>
-          </a>
+          {person.phone && (
+            <a
+              href={telHref}
+              className="group flex items-baseline justify-between py-4 border-b border-neutral-800"
+            >
+              <span className="text-neutral-500 text-[10px] uppercase tracking-[0.25em]">
+                Call
+              </span>
+              <span className="text-white group-hover:text-primary-300 group-active:text-primary-300 transition normal-case">
+                {person.phone}
+              </span>
+            </a>
+          )}
 
           <a
             href={`mailto:${person.email}`}
