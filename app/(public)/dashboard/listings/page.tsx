@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Search, Trash2, Pencil, Rss, PenLine, ChevronLeft, ChevronRight, ChevronDown, SlidersHorizontal, UserPlus, X, Check, Building2 } from 'lucide-react'
+import { Plus, Search, Trash2, Pencil, Rss, PenLine, ChevronLeft, ChevronRight, ChevronDown, SlidersHorizontal, UserPlus, X, Check, Building2, Share2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { getListingTags } from '@/lib/utils'
 import { logActivity } from '@/lib/activity-log'
@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/Button'
 import { DashboardPageHeader } from '../layout'
 import { ListingForm } from '@/components/dashboard/ListingForm'
 import { DeleteConfirmModal } from '@/components/dashboard/DeleteConfirmModal'
+import { SocialPostModal } from '@/components/dashboard/SocialPostModal'
 import type { Listing, ListingStatus, ListingSource, Profile, ListingAssignment } from '@/lib/database.types'
 
 const PAGE_SIZE = 15
@@ -26,6 +27,7 @@ export default function DashboardListingsPage() {
   const [assigningListing, setAssigningListing] = useState<Listing | null>(null)
   const [page, setPage] = useState(0)
   const [deletingListing, setDeletingListing] = useState<Listing | null>(null)
+  const [socialListing, setSocialListing] = useState<Listing | null>(null)
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [statusOpen, setStatusOpen] = useState(true)
   const [sourceOpen, setSourceOpen] = useState(true)
@@ -309,6 +311,14 @@ export default function DashboardListingsPage() {
         />
       )}
 
+      {/* Social post modal */}
+      {socialListing && (
+        <SocialPostModal
+          listing={socialListing}
+          onClose={() => setSocialListing(null)}
+        />
+      )}
+
       {/* Assignment modal */}
       {assigningListing && (
         <AssignmentModal
@@ -387,6 +397,14 @@ export default function DashboardListingsPage() {
                     )}
                   </div>
                   <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setSocialListing(listing)}
+                      disabled={listing.photos.length === 0}
+                      title={listing.photos.length === 0 ? 'Add a photo to enable social posts' : 'Generate social post'}
+                      className="p-1.5 text-neutral-500 hover:text-primary-400 transition-colors disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:text-neutral-500"
+                    >
+                      <Share2 className="w-3.5 h-3.5" />
+                    </button>
                     {listing.source === 'manual' && (
                       <button
                         onClick={() => handleEdit(listing)}
@@ -475,6 +493,14 @@ export default function DashboardListingsPage() {
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
+                        <button
+                          onClick={() => setSocialListing(listing)}
+                          disabled={listing.photos.length === 0}
+                          title={listing.photos.length === 0 ? 'Add a photo to enable social posts' : 'Generate social post'}
+                          className="p-1.5 text-neutral-500 hover:text-primary-400 transition-colors disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:text-neutral-500"
+                        >
+                          <Share2 className="w-3.5 h-3.5" />
+                        </button>
                         {listing.source === 'manual' && (
                           <button
                             onClick={() => handleEdit(listing)}
